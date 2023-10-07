@@ -43,7 +43,7 @@
                         <span class="text">Products</span>
                     </a>
                     <div class="submenu">
-                        <a href="{%url 'adminside:show-product' %}">Product grid</a>
+                        <a href="{%url 'adminside:show-product' %}">Product List    </a>
                         <a href="{%url 'adminside:categories' %}">Categories</a>
                     </div>
                 </li>
@@ -62,7 +62,7 @@
                         <span class="text">Users</span>
                     </a>
                     <div class="submenu">
-                        <a href="{% url 'adminside:users-list' %}">Sellers list</a>
+                        <a href="{% url 'adminside:users-list' %}">Users list</a>
                         <a href="page-seller-detail.html">Seller profile</a>
                     </div>
                 </li>
@@ -71,10 +71,8 @@
                         <span class="text">Add product</span>
                     </a>
                     <div class="submenu">
-                        <a href="page-form-product-1.html">Add product 1</a>
-                        <a href="page-form-product-2.html">Add product 2</a>
-                        <a href="page-form-product-3.html">Add product 3</a>
-                        <a href="page-form-product-4.html">Add product 4</a>
+                        <a href="{% url 'adminside:add-product' %}">Add product 1</a>
+
                     </div>
                 </li>
                 <li class="menu-item has-submenu">
@@ -163,14 +161,11 @@
                     <li class="nav-item">
                         <a href="#" class="requestfullscreen nav-link btn-icon"><i class="material-icons md-cast"></i></a>
                     </li>
-                    <li class="dropdown nav-item">
-                        <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownLanguage" aria-expanded="false"><i class="material-icons md-public"></i></a>
-                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownLanguage">
-                            <a class="dropdown-item text-brand" href="#"><img src={% static "assets-1/imgs/theme/flag-us.png" %}alt="English">English</a>
-                            <a class="dropdown-item" href="#"><img src={% static "assets-1/imgs/theme/flag-fr.png" %} alt="Français">Français</a>
-                            <a class="dropdown-item" href="#"><img src={% static "assets-1/imgs/theme/flag-jp.png" %} alt="Français">日本語</a>
-                            <a class="dropdown-item" href="#"><img src={% static "assets-1/imgs/theme/flag-cn.png" %} alt="Français">中国人</a>
-                        </div>
+                    <li >
+                        <a href="{% url 'adminside:admin-logout'  %}" class="btn btn-sm font-sm btn-light rounded">
+                            logout
+                        </a>
+                        
                     </li>
                     <li class="dropdown nav-item">
                         <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <img class="img-xs rounded-circle" src={% static "assets-1/imgs/people/avatar2.jpg" %} alt="User"></a>

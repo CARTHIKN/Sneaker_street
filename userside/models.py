@@ -48,7 +48,7 @@ class Category(models.Model):
     description = models.TextField(max_length=100, blank=True)
     is_available = models.BooleanField(default=True)
     soft_deleted = models.BooleanField(default=False)
-    Category_image = models.ImageField(upload_to='photos/category', blank=True)
+    Category_image = models.ImageField(upload_to='photos/category', blank=False)
 
 
     class Meta:
@@ -65,15 +65,7 @@ class Category(models.Model):
 
 
 
-class Product_image(models.Model):
-    image = models.ImageField(upload_to='photos/product', null = True, verbose_name='Product Image 1')
-    image2 = models.ImageField(upload_to='photos/product', null = True, verbose_name='Product Image 2')
-    image3 = models.ImageField(upload_to='photos/product', null = True,verbose_name='Product Image 3')
-    image4 = models.ImageField(upload_to='photos/product', null = True,verbose_name='Product Image 4')
-    image5 = models.ImageField(upload_to='photos/product', null = True,verbose_name='Product Image 5')
 
-    def __str__(self):
-        return self.image.name 
 
 
 
@@ -82,16 +74,26 @@ class Product(models.Model):
     Product_name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=100, unique = True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    product_image = models.ForeignKey(Product_image, on_delete=models.CASCADE)
+    main_image = models.ImageField(upload_to='photos/product')
     brand = models.CharField(max_length=200, blank=True)
     description = models.TextField(max_length=500, blank=True)
     price = models.IntegerField()
-    max_price = models.DecimalField(max_digits=10, decimal_places=2)
-    quatity = models.IntegerField()
+    max_price = models.DecimalField(max_digits=10, decimal_places=2) 
+    quantity = models.IntegerField() 
     is_available = models.BooleanField(default=True)
     soft_deleted = models.BooleanField(default=False)
 
 
     def __str__(self):
         return self.Product_name 
+    
+class Product_image(models.Model):
+    product = models.OneToOneField(Product, on_delete=models.CASCADE,default=1)
+    image2 = models.ImageField(upload_to='photos/product', null = True,verbose_name='Product Image 2')
+    image3 = models.ImageField(upload_to='photos/product', null = True,verbose_name='Product Image 3')
+    image4 = models.ImageField(upload_to='photos/product', null = True,verbose_name='Product Image 4')
+    image5 = models.ImageField(upload_to='photos/product', null = True,verbose_name='Product Image 5')
+
+    def __str__(self):
+        return self.image2.name 
 

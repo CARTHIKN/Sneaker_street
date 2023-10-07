@@ -2,42 +2,47 @@ from urllib import request
 from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import UserProfile, Product
+from .models import UserProfile, Product, Product_image
 from django.contrib.auth import authenticate,login,logout
 from django.core.mail import send_mail
 import pyotp
+from django.views.decorators.cache import cache_control
 
 
 
 
 
 # Create your views here.
-
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def landing_page(request):
-
+    
     products = Product.objects.all()
-        
     return render(request,'index.html', {'products':products})
 
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def user_login(request):
-    
+        
+        if 'email' in request.session:
+            return redirect('landing')
+            
         if request.method == "POST":
             email = request.POST['email']
             password = request.POST['password']
             user = authenticate(request, email=email , password=password)
             if user is not None:
+                request.session['email'] = email
                 login(request, user)
                 messages.success(request, ("Logged in successfully "))
                 return redirect(landing_page)
         else:
             messages.success(request, ("Invalid Credentials"))
-            return render(request, 'login.html', {'error':"Invalid Credentials "})  
+            return render(request, 'login.html', {'error':"Invalid Credentials "},)  
     
         return render (request, 'login.html')
 
 
     
-
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def signup(request):
     if request.method == "POST":
             username = request.POST['username']
@@ -80,13 +85,13 @@ def signup(request):
 
 
 
-
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def signout(request):
 
-    if request.user.is_authenticated:
-        logout(request)
+    if 'email' in request.session:
+        request.session.flush()
 
-        return render(request,'login.html')
+    return render(request,'login.html')
 
 def verify_otp(request):
     if 'otp_code' not in request.session or 'user_data' not in request.session:
