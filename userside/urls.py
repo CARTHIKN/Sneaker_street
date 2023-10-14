@@ -9,5 +9,7 @@ urlpatterns = [
     path('signout', views.signout, name ="signout"),
     path('verify_otp', views.verify_otp, name ="verify_otp"),
     path('product/<int:product_id>/', views.product_details, name='product_detail'),
+    path('search/', views.search, name ="search")
+
     
-]
+]       

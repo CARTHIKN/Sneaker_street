@@ -22,6 +22,8 @@
                     <div class="product-detail accordion-detail">
                         <div class="row mb-50">
                             <div class="col-md-6 col-sm-12 col-xs-12">
+                                <form action="{% url 'add-cart' product.id %}" method="POST">
+                                {% csrf_token %}
                                 <div class="detail-gallery">
                                     <span class="zoom-icon"><i class="fi-rs-search"></i></span>
                                     <!-- MAIN SLIDES -->
@@ -101,27 +103,23 @@
                                             <li><i class="fi-rs-credit-card mr-5"></i> Cash on Delivery available</li>
                                         </ul>
                                     </div>
-                                    <div class="attr-detail attr-color mb-15">
+                                    <div class="attr-detail attr-color mb-15" >
                                         <strong class="mr-10">Color</strong>
-                                        <ul class="list-filter color-filter">
-                                            <li><a href="#" data-color="Red"><span class="product-color-red"></span></a></li>
-                                            <li><a href="#" data-color="Yellow"><span class="product-color-yellow"></span></a></li>
-                                            <li class="active"><a href="#" data-color="White"><span class="product-color-white"></span></a></li>
-                                            <li><a href="#" data-color="Orange"><span class="product-color-orange"></span></a></li>
-                                            <li><a href="#" data-color="Cyan"><span class="product-color-cyan"></span></a></li>
-                                            <li><a href="#" data-color="Green"><span class="product-color-green"></span></a></li>
-                                            <li><a href="#" data-color="Purple"><span class="product-color-purple"></span></a></li>
-                                        </ul>
+                                        <select name="color" class="form-control" required>
+                                            <option value="" disabled selected>Choose color</option>
+                                            {% for i in product.variation_set.colors %}
+                                            <option value="{{i.variation_value | lower}}">{{i.variation_value | capfirst}} </option>
+                                            {% endfor %}
+                                        </select>
                                     </div>
                                     <div class="attr-detail attr-size">
-                                        <strong class="mr-10">Size</strong>
-                                        <ul class="list-filter size-filter font-small">
-                                            <li><a href="#">S</a></li>
-                                            <li class="active"><a href="#">M</a></li>
-                                            <li><a href="#">L</a></li>
-                                            <li><a href="#">XL</a></li>
-                                            <li><a href="#">XXL</a></li>
-                                        </ul>
+                                        <strong class="mr-10">Size </strong>
+                                        <select name="size" class="form-control" required>
+                                            <option value="" disabled selected>Choose size</option>
+                                            {% for i in product.variation_set.sizes %}
+                                            <option value="{{i.variation_value | lower}}">{{i.variation_value | capfirst}} </option>
+                                            {% endfor %}
+                                        </select>
                                     </div>
                                     <div class="bt-1 border-color-1 mt-30 mb-30"></div>
                                     <div class="detail-extralink">
@@ -130,11 +128,19 @@
                                             <span class="qty-val">1</span>
                                             <a href="#" class="qty-up"><i class="fi-rs-angle-small-up"></i></a>
                                         </div>
-                                        <div class="product-extra-link2">
-                                            <button type="submit" class="button button-add-to-cart">Add to cart</button>
-                                            <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
+                                        <div class="product-extra-link2" style="position: relative;">
+                                            <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html" style="position: relative; z-index: 2;"><i class="fi-rs-heart"></i></a>
                                             <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
                                         </div>
+                                        {% if product.quantity <= 0 %}
+                                        <h5 class="text-danger">Out of Stock</h5>
+                                        {% else %}
+                                            <div class="product-extra-link2" style="position: relative;">
+                                                    <button type="submit" class="button button-add-to-cart text-center" style=" height: 42px; width:190px; color: white; ">Add to cart</button> 
+                                            </div>
+                                        {% endif %}
+                                        </form>
+                                        
                                     </div>
                                     <ul class="product-meta font-xs color-grey mt-50">
                                         <li class="mb-5">SKU: <a href="#">FWM15VKT</a></li>

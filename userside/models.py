@@ -1,3 +1,4 @@
+from typing import Self
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin,Group, Permission
 from django.db import models
 from django.utils.text import slugify
@@ -42,6 +43,7 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     
 
 
+
 class Category(models.Model):
     Category_name = models.CharField(max_length=25, unique=True)
     slug = models.SlugField(max_length=25, unique = False)
@@ -68,8 +70,6 @@ class Category(models.Model):
 
 
 
-
-
 class Product(models.Model):
     Product_name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=100, unique = True)
@@ -82,10 +82,40 @@ class Product(models.Model):
     quantity = models.IntegerField() 
     is_available = models.BooleanField(default=True)
     soft_deleted = models.BooleanField(default=False)
-
-
+   
+    
     def __str__(self):
         return self.Product_name 
+    
+
+class VariationManager(models.Manager):
+    def colors(self):
+        return super(VariationManager, self).filter(variation_category = 'color', is_active = True)
+    
+    def sizes(self):
+        return super(VariationManager, self).filter(variation_category = 'size', is_active = True)
+
+
+variation_category_choice = (
+    ('color', 'color'),
+    ('size', 'size'), 
+
+)
+
+
+
+class Variation(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    variation_category = models.CharField(max_length=100, choices=variation_category_choice)
+    variation_value = models.CharField(max_length=100)
+    is_active = models.BooleanField(default=True)
+    created_date = models.DateTimeField(auto_now=True)
+
+    objects = VariationManager()
+
+    def __str__(self):
+        return self.variation_value
+
     
 class Product_image(models.Model):
     product = models.OneToOneField(Product, on_delete=models.CASCADE,default=1)

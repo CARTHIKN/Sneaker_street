@@ -4,12 +4,15 @@ from userside.models import UserProfile, Product, Category, Product_image
 from django.contrib.auth import authenticate,login,logout
 from django.utils.text import slugify
 from django.views.decorators.cache import cache_control
+from django.contrib.auth.decorators import user_passes_test
 # Create your views here.
+
+def is_superuser(user):
+    return user.is_superuser
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def admin_login(request):
-    if 'email' in request.session:
-    # if request.user.is_superuser:
+    if request.user.is_authenticated and 'email' not in request.session :
         return render(request, 'adminside/dashboard.html')
     else:
         if request.method == "POST":
@@ -17,7 +20,7 @@ def admin_login(request):
             password = request.POST['password']
             user = authenticate(request, email=email , password=password)
             if user is not None and user.is_superuser:
-                request.session['email'] = email
+                login(request,user)
                 return redirect('adminside:dashboard')
             else :
                 messages.success(request,'Invalid credentials')
@@ -26,8 +29,9 @@ def admin_login(request):
             return render(request, 'adminside/admin_login.html')
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@user_passes_test(is_superuser)
 def dashboard(request):
-    if 'email' in request.session:
+    if request.user.is_authenticated:
         return render(request, 'adminside/dashboard.html')
     else:
         return redirect('adminside:admin-login')
@@ -35,29 +39,32 @@ def dashboard(request):
   
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def admin_logout(request):
-    if 'email' in request.session:
-        request.session.flush()
-    return redirect('adminside:admin-login')
+   if request.user.is_authenticated:
+        logout(request)
+   return redirect('adminside:admin-login')
     
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@user_passes_test(is_superuser)
 def show_product(request):
-    if 'email' in request.session:
+    if request.user.is_authenticated:
         products = Product.objects.all()
         return render(request, 'adminside/show_product.html', {'products':products})
     else:
         return render(request, 'adminside/admin_login.html')
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@user_passes_test(is_superuser)
 def users_list(request):
-    if 'email' in request.session:
+    if request.user.is_authenticated:
         users = UserProfile.objects.all()
         return render(request,'adminside/users_list.html', {'users': users})
     else:
         return render(request, 'adminside/admin_login.html')
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@user_passes_test(is_superuser)
 def admin_users_block_unblock(request, id):
-    if 'email' in request.session:
+    if request.user.is_authenticated:
         user = UserProfile.objects.get(id = id )
         if user.is_blocked:
             user.is_blocked = False
@@ -74,8 +81,9 @@ def admin_users_block_unblock(request, id):
         return render(request, 'adminside/admin_login.html')
     
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@user_passes_test(is_superuser)
 def categories(request):
-    if 'email' in request.session:
+    if request.user.is_authenticated:
 
         categories = Category.objects.all()
 
@@ -115,16 +123,18 @@ def categories(request):
 
 
 def toggle_soft_delete(request, category_id):
-    category = get_object_or_404(Category, pk=category_id)
-    category.soft_deleted = not category.soft_deleted  # Toggle the soft_deleted field
-    category.save()
-    
-    return redirect('adminside:categories')
+    if request.user.is_authenticated:
+        category = get_object_or_404(Category, pk=category_id)
+        category.soft_deleted = not category.soft_deleted  # Toggle the soft_deleted field
+        category.save()
+        
+        return redirect('adminside:categories')
 
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@user_passes_test(is_superuser)
 def add_product(request):
-    if 'email' in request.session:
+    if request.user.is_authenticated:
         categories = Category.objects.all()
         products = Product.objects.all()
         
@@ -186,8 +196,9 @@ def add_product(request):
 
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@user_passes_test(is_superuser)
 def edit_product(request, product_id):
-    if 'email' in request.session:
+    if request.user.is_authenticated:
         product = get_object_or_404(Product, pk=product_id)
         categories = Category.objects.all()
         return render(request, 'adminside/addproduct.html', {'product': product, "categories": categories })
@@ -196,8 +207,9 @@ def edit_product(request, product_id):
 
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@user_passes_test(is_superuser)
 def update_product(request, product_id):
-    if 'email' in request.session:
+    if request.user.is_authenticated:
         if request.method == 'POST':
             product = get_object_or_404(Product, pk=product_id)
             
@@ -237,8 +249,9 @@ def update_product(request, product_id):
 
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@user_passes_test(is_superuser)
 def delete_product(request, product_id):
-    if 'email' in request.session:
+    if request.user.is_authenticated:
         product = get_object_or_404(Product, pk=product_id)      
         product.soft_deleted = not product.soft_deleted
         product.save()       

@@ -1,4 +1,6 @@
 from urllib import request
+from django.http import HttpResponse
+
 from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -7,10 +9,8 @@ from django.contrib.auth import authenticate,login,logout
 from django.core.mail import send_mail
 import pyotp
 from django.views.decorators.cache import cache_control
-
-
-
-
+from carts.views import  _cart_id
+from carts.models import  CartItem
 
 # Create your views here.
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
@@ -22,7 +22,7 @@ def landing_page(request):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def user_login(request):
         
-        if 'email' in request.session:
+        if request.user.is_authenticated and not request.user.is_superuser:
             return redirect('landing')
             
         if request.method == "POST":
@@ -30,7 +30,6 @@ def user_login(request):
             password = request.POST['password']
             user = authenticate(request, email=email , password=password)
             if user is not None:
-                request.session['email'] = email
                 login(request, user)
                 messages.success(request, ("Logged in successfully "))
                 return redirect(landing_page)
@@ -88,10 +87,10 @@ def signup(request):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def signout(request):
 
-    if 'email' in request.session:
-        request.session.flush()
+    if request.user.is_authenticated:
+        logout(request)
 
-    return render(request,'login.html')
+        return render(request,'login.html')
 
 def verify_otp(request):
     if 'otp_code' not in request.session or 'user_data' not in request.session:
@@ -124,4 +123,16 @@ def verify_otp(request):
 
 def product_details(request, product_id):
     product = get_object_or_404(Product, id=product_id)
-    return render(request, 'productdetails.html', {'product': product})
+    in_cart = CartItem.objects.filter(cart__cart_id =_cart_id(request), product=product).exists()
+
+    context = {
+        'product':product,
+        'in_cart':in_cart
+    }
+
+    return render(request, 'productdetails.html', context)
+
+
+def search(request):
+    return HttpResponse("search page")
+
