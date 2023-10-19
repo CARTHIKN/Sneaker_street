@@ -57,6 +57,7 @@ EMAIL_HOST_PASSWORD = 'ihyd nrns djbi lafi'
 
 
 MIDDLEWARE = [
+    
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

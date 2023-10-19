@@ -3,6 +3,10 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from userside.views import UserProfile
 from .models import Userdetails
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import update_session_auth_hash
+from django.contrib import messages
+
 
 # Create your views here.
 @login_required
@@ -53,3 +57,27 @@ def edit_profile(request):
         'userdetails': userdetails,
     }
     return render(request, 'userprofile/edit_profile.html', context)    
+
+
+@login_required
+def change_password(request):
+    if request.method == "POST":
+        current_password = request.POST['password']
+        new_password = request.POST['new_password']
+        confirm_password = request.POST['new_password2']
+
+        user = request.user  
+
+        if user.check_password(current_password):
+            if new_password == confirm_password:
+                user.set_password(new_password)
+                user.save()
+                update_session_auth_hash(request, user)  # Update the session to keep the user logged in
+                messages.success(request, "Password changed successfully.")
+                return redirect('userprofile:user-profile')
+            else:
+                messages.error(request, "New password and confirmation do not match.")
+        else:
+            messages.error(request, "Current password is incorrect.")
+
+    return render(request, 'userprofile/change_password.html')

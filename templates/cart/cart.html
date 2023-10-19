@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load static  %}
 {% block title %} Cart {% endblock title %}
 {% block content %}
-{% load static  %}
+
 
 
 <section class="mt-50 mb-50">
@@ -383,7 +384,7 @@
                                         <tbody>
                                             <tr>
                                                 <td class="cart_total_label">Cart Subtotal</td>
-                                                <td class="cart_total_amount"><strong><span class="font-xl fw-900 text-brand">Rs:{{total    }}</span></strong></td>
+                                                <td class="cart_total_amount"><strong><span class="font-xl fw-900 text-brand">Rs:{{total}}</span></strong></td>
                                             </tr>
                                             <tr>
                                                 <td class="cart_total_label">Tax</td>
@@ -397,7 +398,7 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <a href="#" class="btn "> <i class="fi-rs-box-alt mr-10"></i> Proceed To CheckOut</a>
+                                <a href="{% url 'checkout' %}" class="btn "> <i class="fi-rs-box-alt mr-10"></i> Proceed To CheckOut</a>
                             </div>
                         </div>
                     </div>

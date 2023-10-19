@@ -4376,3 +4376,9 @@ body.dark .dropdown-menu .dropdown-item.text-danger {
         display: none
     }
 }
+
+
+
+.space {
+        margin: 0 10px; /* Adjust the margin as needed to control the spacing */
+}
