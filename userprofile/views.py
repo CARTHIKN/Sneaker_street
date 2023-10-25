@@ -6,10 +6,13 @@ from .models import Userdetails
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
+from orders.models import OrderProduct, Order
+from django.views.decorators.cache import cache_control
 
 
 # Create your views here.
 @login_required
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def user_profile(request):
     print(request)
     user_profile_instance = UserProfile.objects.get(email=request.user)
@@ -23,6 +26,7 @@ def user_profile(request):
     return render(request, 'userprofile/account.html', context)
 
 @login_required
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def edit_profile(request):
     user_profile_instance = UserProfile.objects.get(email=request.user)
     userdetails, created = Userdetails.objects.get_or_create(userprofile=user_profile_instance)
@@ -60,6 +64,7 @@ def edit_profile(request):
 
 
 @login_required
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def change_password(request):
     if request.method == "POST":
         current_password = request.POST['password']
@@ -81,3 +86,13 @@ def change_password(request):
             messages.error(request, "Current password is incorrect.")
 
     return render(request, 'userprofile/change_password.html')
+
+@login_required
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+def user_orders(request):
+    # Query the orders for the logged-in user
+    orderroducts = OrderProduct.objects.filter(user=request.user)
+    orders = Order.objects.filter(user=request.user)
+
+
+    return render(request, 'userprofile/user_orders.html', {'orders': orders, 'orderproducts':orderroducts})

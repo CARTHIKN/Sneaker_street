@@ -1,0 +1,45 @@
+{% extends "userprofile/user_profile_base.html" %}
+
+
+
+{% block usercontent %}
+
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Your Orders</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    
+                    {% for orderproduct in orderproducts  %}
+                    <tbody>
+                        <tr>
+                            <td>#{{orderproduct.order.order_number}}</td>
+                            <td>{{orderproduct.created_at}}</td>
+                            <td>{{orderproduct.order.status}}</td>
+                            <td>{{orderproduct.product_price}}</td>
+                            <td><a href="{% url 'user-order-details' order_number=orderproduct.order.order_number %}" class="btn-small d-block">view</a></td>
+                        </tr>
+                        {% endfor %}
+                        
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+</div>
+
+{% endblock usercontent %}

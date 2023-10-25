@@ -5,7 +5,14 @@ from . models import Cart, CartItem
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
+from django.contrib.auth.decorators import user_passes_test
 
+def is_customer(user):
+    return not user.is_superuser and not user.is_staff
+
+def customer_login_required(view_func):
+    decorated_view = login_required(view_func, login_url='user_login')
+    return user_passes_test(is_customer)(decorated_view)
 
 def _cart_id(request):
     cart = request.session.session_key
@@ -200,7 +207,7 @@ def cart(request, total=0, quantity=0, cart_items=None, tax=0, grand_total=0):
     return render(request, 'cart/cart.html', context)
 
 
-@login_required(login_url='user_login')
+@customer_login_required
 def checkout(request, total=0, quantity=0, cart_items=None, tax=0, grand_total=0):
     try:
         if request.user.is_authenticated:

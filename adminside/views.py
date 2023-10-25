@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate,login,logout
 from django.utils.text import slugify
 from django.views.decorators.cache import cache_control
 from django.contrib.auth.decorators import user_passes_test
+from orders.models import OrderProduct
 # Create your views here.
 
 def is_superuser(user):
@@ -12,7 +13,7 @@ def is_superuser(user):
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def admin_login(request):
-    if request.user.is_authenticated and 'email' not in request.session :
+    if request.user.is_authenticated and request.user.is_superuser :
         return render(request, 'adminside/dashboard.html')
     else:
         if request.method == "POST":
@@ -258,3 +259,11 @@ def delete_product(request, product_id):
         return redirect('adminside:show-product') 
     else:
         return render(request, 'adminside/admin_login.html')
+    
+
+
+
+def admin_orders(request):
+    orders = OrderProduct.objects.all()
+
+    return render(request, 'adminside/orders.html', {'orders':orders})

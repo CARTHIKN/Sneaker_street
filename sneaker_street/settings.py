@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'adminside',
     'userprofile',
     'carts',
+    'orders',
     
 ]
 
@@ -123,6 +124,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },   
 ]
 
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+LOGIN_URL = 'user_login'
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/

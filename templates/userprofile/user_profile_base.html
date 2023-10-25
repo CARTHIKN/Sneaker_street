@@ -6,34 +6,25 @@
         <div class="row">
             <div class="col-lg-10 m-auto">
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
+                        
                         <div class="dashboard-menu">
-                            <ul class="nav flex-column" role="tablist">
-                                <li class="nav-item">
-                                    <a class="nav-link active"  data-bs-toggle="tab" href="{% url 'userprofile:user-profile'  %}" role="tab" aria-controls="dashboard" aria-selected="false"><i class="fi-rs-user mr-10"></i></i>Profile</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="orders-tab" data-bs-toggle="tab" href="#orders" role="tab" aria-controls="orders" aria-selected="false"><i class="fi-rs-shopping-bag mr-10"></i>Orders</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="track-orders-tab" data-bs-toggle="tab" href="#track-orders" role="tab" aria-controls="track-orders" aria-selected="false"><i class="fi-rs-shopping-cart-check mr-10"></i>Track Your Order</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="address-tab" data-bs-toggle="tab" href="#address" role="tab" aria-controls="address" aria-selected="true"><i class="fi-rs-marker mr-10"></i>My Address</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="account-detail-tab" data-bs-toggle="tab" href="#account-detail" role="tab" aria-controls="account-detail" aria-selected="true"><i class="fi-rs-user mr-10"></i>Account details</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="page-login-register.html"><i class="fi-rs-sign-out mr-10"></i>Logout</a>
-                                </li>
+                            <!-- Sidebar menu with links to profile, orders, address, etc. -->
+                            <ul >
+                                <li style="min-height: 45px;display: flex; align-items: center;" ><a href="{% url 'userprofile:user-profile' %}"><i class="fi-rs-user mr-10"></i> PROFILE</a></li>
+                                <li style="min-height: 45px; display: flex; align-items: center;"><a href="{% url 'userprofile:user-orders' %}"><i class="fi-rs-shopping-bag mr-10"></i> ORDERS</a></li>
+                                <li style="min-height: 45px;display: flex; align-items: center;"><a href=""><i class="fi-rs-marker mr-10"></i> MY ADDRESS</a></li>
+                                <li style="min-height: 45px;display: flex; align-items: center;"><a href="{% url 'signout' %}"><i class="fi-rs-sign-out mr-10"></i> LOG OUT</a></li>
+                                <!-- Add more sections as needed -->
                             </ul>
                         </div>
-                    </div>
-                    <div class="col-md-8">
-                    {% block usercontent %}
 
-                    {% endblock usercontent %}
+                    </div>
+                    <div class="col-md-6">
+                        <div class="dashboard-content ">
+                            <!-- This is where the dynamic content will be loaded -->
+                            {% block usercontent %} {% endblock usercontent %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -41,5 +32,49 @@
     </div>
 </section>
 
+
+
+<!-- Preloader Start -->
+<div id="preloader-active">
+<div class="preloader d-flex align-items-center justify-content-center">
+    <div class="preloader-inner position-relative">
+        <div class="text-center">
+            <h5 class="mb-5">Now Loading</h5>
+            <div class="loader">
+                <div class="bar bar1"></div>
+                <div class="bar bar2"></div>
+                <div class="bar bar3"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<!-- Vendor JS-->
+<script src="assets/js/vendor/modernizr-3.6.0.min.js"></script>
+<script src="assets/js/vendor/jquery-3.6.0.min.js"></script>
+<script src="assets/js/vendor/jquery-migrate-3.3.0.min.js"></script>
+<script src="assets/js/vendor/bootstrap.bundle.min.js"></script>
+<script src="assets/js/plugins/slick.js"></script>
+<script src="assets/js/plugins/jquery.syotimer.min.js"></script>
+<script src="assets/js/plugins/wow.js"></script>
+<script src="assets/js/plugins/jquery-ui.js"></script>
+<script src="assets/js/plugins/perfect-scrollbar.js"></script>
+<script src="assets/js/plugins/magnific-popup.js"></script>
+<script src="assets/js/plugins/select2.min.js"></script>
+<script src="assets/js/plugins/waypoints.js"></script>
+<script src="assets/js/plugins/counterup.js"></script>
+<script src="assets/js/plugins/jquery.countdown.min.js"></script>
+<script src="assets/js/plugins/images-loaded.js"></script>
+<script src="assets/js/plugins/isotope.js"></script>
+<script src="assets/js/plugins/scrollup.js"></script>
+<script src="assets/js/plugins/jquery.vticker-min.js"></script>
+<script src="assets/js/plugins/jquery.theia.sticky.js"></script>
+<!-- Template  JS -->
+<script src="assets/js/main.js"></script>
+</body>
+
+
+<!-- Mirrored from wp.alithemes.com/html/evara/evara-frontend/page-account.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:27:15 GMT -->
+</html>
 
 {% endblock content %}

@@ -14,6 +14,7 @@ urlpatterns = [
     path('admin-users-block-unblock/<int:id>',views.admin_users_block_unblock, name = "admin-users-block-unblock"),
     path('dashboard/categories', views.categories, name="categories"),
     path('dashboard/add-product', views.add_product, name="add-product"),
+    path('dashboard/orders', views.admin_orders, name="admin-orders"),
 
     path('soft-delete-category/<int:category_id>/', views.toggle_soft_delete, name='soft-delete-category'),
     path('edit-product/<int:product_id>/', views.edit_product, name='edit-product'),
