@@ -53,7 +53,8 @@
                                                     <div>
                                                         <button type="submit" class="add_quantity" data-product-id="{{ cart_item.product.id }}" style="background-color: transparent; border: none; padding: 0; cursor: pointer; font-size: inherit; color: inherit;">
                                                             <i class="fi-rs-angle-small-up" style="font-size: 1.2em;"></i>
-                                                        </button>    
+                                                        </button>  
+                                                          
                                                     </div>
                                                     <div>
                                                         <span class="quantity">{{ cart_item.quantity }}</span>
@@ -62,10 +63,15 @@
                                                         <a type="button" href="{% url 'remove-cart' cart_item.product.id cart_item.id %}" class="delete_quantity" data-product-id="{{ cart_item.product.id }}"><i class="fi-rs-angle-small-down"></i></a>
                                                     </div>
                                                 </form> 
+                                               
                                            </td>
+
                                     <td class="text-right" data-title="Cart">
                                         <span>{{cart_item.sub_total}} </span>
                                     </td>
+                                    {% if cart_item.product.quantity <= 0 %}
+                                        <div class="text-danger">Out of Stock</div>
+                                    {% endif %}
                                     <td class="action" data-title="Remove"><a href="{% url 'remove-cart-item' cart_item.product.id cart_item.id %}" class="text-muted" onclick="return confirm('Are you sure you want to delete this item ?')"><i class="fi-rs-trash"></i></a></td>
                                 </tr>
                                 {% endfor %}

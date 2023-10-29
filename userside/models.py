@@ -40,6 +40,44 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email 
     
+class AddressBook(models.Model):
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, null=True)
+    name = models.CharField(max_length=30)
+    phone = models.CharField(max_length=20)
+    address_line_1 = models.CharField(max_length=50)
+    address_line_2 = models.CharField(max_length=50, blank=True, null=True)
+    city = models.CharField(max_length=50)
+    state = models.CharField(max_length=50)
+    country = models.CharField(max_length=50)
+    pincode = models.CharField(max_length=20)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_default = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
+
+    def save(self, *args, **kwargs):
+        if self.is_default:
+            # Set is_default=False for other addresses of the same user
+            AddressBook.objects.filter(user=self.user).exclude(
+                pk=self.pk).update(is_default=False)
+        super(AddressBook, self).save(*args, **kwargs)
+
+    def get_user_full_address(self):
+        address_parts = [self.address_line_1]
+        if self.address_line_2:
+            address_parts.append(self.address_line_2)
+        address_parts.append(self.pincode)
+        address_parts.extend([self.city, self.state, self.country])
+        return ', '.join(address_parts)
+    
+    
+  
+    def full_address(self):
+        return f'{self.address_line_1} {self.address_line_2}'
+
+    def __str__(self):
+        return self.name
+    
 
 
 

@@ -85,9 +85,10 @@
                     <div class="row">
                         <div class="col-md-9">
                             <div class="mb-4">
+                               
                                 <label class="form-label">Images</label>
                                 
-                                <input type="file" name="main_image" >
+                                <input type="file" name="main_image" {% if product.main_image %} {% endif %}>
                                 <input type="file" name="image2">
                                 <input type="file" name="image3">
                                 <input type="file" name="image4">
@@ -96,6 +97,11 @@
                         </div>
 
                     </div> 
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
                     <button class="btn btn-primary" type="submit">{% if product %}Save Changes{% else %}Add Product{% endif %} </button>
                    <!-- .row end// -->
                 </div>

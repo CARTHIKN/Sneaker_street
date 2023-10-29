@@ -1,0 +1,45 @@
+
+{% extends "userprofile/user_profile_base.html" %}
+{% block usercontent %}
+
+<form  method="POST"> 
+    {% csrf_token %}
+<div class="row">
+    <div class="col-md-6 form-group">
+        <label>Name</label>
+        <input class="form-control" type="text" name="name" value="{{ address.name }}">
+    </div>
+    <div class="col-md-6 form-group">
+        <label>Mobile No</label>
+        <input class="form-control" name="phone" type="text" value="{{ address.phone }}">
+    </div>
+    <div class="col-md-6 form-group">
+        <label>Address Line 1</label>
+        <input class="form-control" name="address_line_1" type="text" value="{{ address.address_line_1 }}">
+    </div>
+    <div class="col-md-6 form-group">
+        <label>Address Line 2</label>
+        <input class="form-control" name="address_line_2" type="text" value="{{ address.address_line_2 }}">
+    </div>
+    <div class="col-md-6 form-group">
+        <label>Country</label>
+        <input class="form-control" name="country" type="text" value="{{ address.country }}">
+    </div>
+    <div class="col-md-6 form-group">
+        <label>City</label>
+        <input class="form-control" name="city" type="text" value="{{ address.city }}">
+    </div>
+    <div class="col-md-6 form-group">
+        <label>State</label>
+        <input class="form-control" name="state" type="text" value="{{ address.state }}">
+    </div>
+    <div class="col-md-6 form-group">
+        <label>ZIP Code</label>
+        <input class="form-control" name="pincode" type="text" value="{{ address.pincode }}">
+    </div>
+</div>
+<button type="submit" class="btn btn-primary">
+    Update address
+</button>
+
+{% endblock %}

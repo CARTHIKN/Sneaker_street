@@ -23,7 +23,7 @@ from django.conf import settings
 urlpatterns = [
     path('djangoadmin/', admin.site.urls),
     path('',include('userside.urls')),
-    path('',include('adminside.urls')),
+    path('adminlogin/',include('adminside.urls')),
     path('',include('userprofile.urls')),
     path('cart/',include('carts.urls')),
 

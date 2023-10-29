@@ -19,8 +19,16 @@
                         </div>
                             
                             
-
+                        <div id="otp-timer">Time remaining: 2:00</div>
+                        {% if messages %}
+                        <ul class="messages">
+                            {% for message in messages %}
+                                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
                         <div class="form-group">
+                            
                             <button type="submit" class="btn btn-fill-out btn-block hover-up" name="login">Verify OTP </button>
                         </div>
                     </form>
@@ -32,5 +40,50 @@
     </div>
 
 </div>
+<script>
+
+    setTimeout(function(){
+        window.location.reload(1);
+     }, 125000);
+
+    function startTimer(duration, display) {
+        let timer = duration, minutes, seconds;
+        setInterval(function () {
+            minutes = parseInt(timer / 60, 10);
+            seconds = parseInt(timer % 60, 10);
+    
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+    
+            display.textContent = "Time remaining: " + minutes + ":" + seconds;
+    
+            if (--timer < 0) {
+                // Timer has expired, you can trigger OTP resend here or disable the form
+                display.textContent = "OTP Expired";
+                // Optionally, handle OTP expiration and resend here
+            }
+        }, 1000);
+    }
+    
+    window.onload = function () {
+        const otpTimerDisplay = document.querySelector('#otp-timer');
+        const duration = 120; // Duration in seconds (2 minutes)
+        startTimer(duration, otpTimerDisplay);
+    };
+    </script>
+
+    <script>
+        // Function to check if OTP has expired
+        function checkOTPExpiry() {
+            var otpExpired = {{ otp_expired|default:"False"|lower }};
+            if (otpExpired === "true") {
+                // OTP has expired, refresh the page
+                location.reload();
+            }
+        }
+    
+        // Call the function every few seconds (e.g., every 5 seconds)
+        setInterval(checkOTPExpiry, 5000);  // 5000 milliseconds = 5 seconds
+    </script>
 
 {% endblock content %}

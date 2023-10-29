@@ -4,9 +4,9 @@ from . import views
 app_name = 'adminside'
 
 urlpatterns = [
-    path('admin-login/', views.admin_login, name="admin-login"),
+    path('', views.admin_login, name="adminlogin"),
     path('admin-logout/', views.admin_logout, name="admin-logout"),
-    path('dashboard/',views.dashboard, name="dashboard"),
+    path('dashboard/', views.dashboard, name="dashboard"), 
 
 
     path('dashboard/show-product/', views.show_product, name="show-product"),
@@ -20,6 +20,9 @@ urlpatterns = [
     path('edit-product/<int:product_id>/', views.edit_product, name='edit-product'),
     path('update-product/<int:product_id>/', views.update_product, name='update-product'),
     path('delete-product/<int:product_id>/', views.delete_product, name='delete-product'),
+    path('admin-orders-details/<int:order_number>', views.admin_orders_details, name='admin-orders-details'),
+    path('delivered-order/<int:order_number>/', views.delivered_order, name='delivered-order'),
+    path('adminadd_variations/', views.add_variations, name='add-variations'),
 
 
     

@@ -1,0 +1,141 @@
+{% extends "adminside\base1.html" %}
+
+{% block title %} Dashboard{% endblock title %}
+
+{% block content %}
+<div class="contianer">
+    <div class="row align-items-center">
+
+        <div class="col-md-12">
+            <div class="tab-content dashboard-content">
+                <div class="tab-pane fade active show" role="tabpanel" aria-labelledby="dashboard-tab">
+                    <div class="card">
+                        
+                        <div class="card-header">
+                            {% comment %} <strong class="d-inline-block mr-3">Order ID: {{order.order_number}}</strong>
+                            <span>,{{order.created_at}}</span> {% endcomment %}
+                            <br>
+                            <span>Order Status : 
+                                {% if 'Cancelled' in order.status %}
+                                <span class="text-danger">Cancelled</span> 
+                                {% elif 'Returned' in order.status%}
+                                <span class="text-danger">Returned</span> 
+                                {% else %}
+                                 <span class="text-success">{{order.status}}
+                                 </span>
+                                {% endif %}</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row"> 
+                                <div class="col-md-8">
+                                    <h6 class="text-muted">Delivery to</h6>
+                                    <p>{{order.shipping_address.name}} <br>  
+                                    Phone: {{order.shipping_address.phone}},  <br>
+                                    Location: {{order.shipping_address.address_line_1}}, 
+                                    {{order.shipping_address.address_line_2}}, 
+                                    {{order.shipping_address.city}},  
+                                    {{order.shipping_address.state}}, 
+                                    {{order.shipping_address.country}} <br> 
+                                    Pincode : {{order.shipping_address.pincode}}
+                                     </p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="text-muted">Payment</h6>
+                                    <span class="text-success">
+                                        <i class="fab fa-lg fa-cc-visa"></i>
+                                         Method :{{order.payment.payment_method}} 
+                                    </span>
+                                    <div class="text-success">
+                                        <i class="fab fa-lg fa-cc-visa"></i>
+                                         id :{{order.payment.payment_id}} 
+                                        
+                                    </div>
+                                   
+                                    <div class="text-success">
+                                        <i class="fab fa-lg fa-cc-visa"></i>
+                                         Status :  {{order.payment.status}} 
+                                    </div>
+                                   
+                                    <p class="m-0 p-0"> 
+                                     <span >Wallet Paid: Rs {{order.wallet_discount}} </span>
+                                    </p>
+                                    <p class="m-0 p-0"> 
+                                     <span >Coupon Used: {{order.coupon.coupon_code}} </span>
+                                    </p>
+                                    <p class="m-0 p-0"> 
+                                     <span >Additional Discount: {{order.additional_discount}} </span>
+                                    </p>
+                                    <p> 
+                                     <span class="b">Total Paid: Rs {{order.payment.amount_paid}} </span>
+                                    </p>
+                                </div>
+                            </div> <!-- row.// -->
+                        </div>
+        
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th >Product</th>
+                                    
+                                    <th>Total</th>
+        
+                                </tr>
+                            </thead>
+                            <tbody>
+                           {% for ordered_product in ordered_products %}
+                           <tr>
+                            <td>
+                                <div class="row align-items-center">
+                                    <div class="col-md-2">
+                                        <img src="{{ ordered_product.product.main_image.url }}" alt="#" style="max-width: 100px; max-height: 100px;">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h5><a href="shop-product-full.html">{{ ordered_product.product.Product_name }}</a></h5>
+                                        <span class="product-qty">x {{ ordered_product.quantity }}</span>
+                                        <p class="font-xs">
+                                            {% for item in ordered_product.variation.all %}
+                                                {{ item.variation_category | capfirst }} : {{ item.variation_value | capfirst }}<br>
+                                            {% endfor %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>${{ order.payment.amount_paid }}</td>
+                        </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+        
+                        {% comment %} {% if order.status == 'New' or order.status == 'Accepted' %}
+                        <a href="{% url 'order-cancel-user' order.order_number %}" class="btn btn-outline-danger my-2 mx-2">
+                            Cancel Order
+                        </a> 
+                        {% elif order.status == 'Delivered' %} {% endcomment %}
+                        {% comment %} <a href="{% url 'orders:order-return-user' %}" class="btn btn-outline-primary my-2 mx-2">
+                            Return Order
+                        </a> {% endcomment %}
+                        {% comment %} {% endif %} {% endcomment %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+    </div>
+    
+</div>
+
+
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<style>
+.btn.btn-outline-danger {
+color: #dc3545 !important;
+border-color: #dc3545 !important;
+background: aliceblue;
+}
+</style>
+{% endblock %}

@@ -1,11 +1,11 @@
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
-from userside.models import UserProfile, Product, Category, Product_image
+from userside.models import UserProfile, Product, Category, Product_image, Variation
 from django.contrib.auth import authenticate,login,logout
 from django.utils.text import slugify
 from django.views.decorators.cache import cache_control
 from django.contrib.auth.decorators import user_passes_test
-from orders.models import OrderProduct
+from orders.models import Order, OrderProduct, variation_category_choice
 # Create your views here.
 
 def is_superuser(user):
@@ -42,7 +42,7 @@ def dashboard(request):
 def admin_logout(request):
    if request.user.is_authenticated:
         logout(request)
-   return redirect('adminside:admin-login')
+   return redirect('adminside:adminlogin')
     
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @user_passes_test(is_superuser)
@@ -141,55 +141,68 @@ def add_product(request):
         
         if request.method == "POST":
             product_name = request.POST['product_name']
-            if Product.objects.filter(Product_name=product_name).exists():
-                messages.error(request, 'A product with this name already exists.')
-                
-            slug = slugify(product_name)
-            category_id = request.POST['category']
-            category = Category.objects.get(id=category_id)
-            brand = request.POST['brand']
-            description = request.POST['description']
-            price = request.POST['price']
-            main_image = request.FILES.get('main_image')
-            max_price = request.POST['max_price']
-            quantity = request.POST['quantity']
-            is_available = request.POST.get('is_available') == 'True' 
-            if is_available == 'on':
-                is_available = True
-            else:
-                is_available = False 
-            soft_deleted = request.POST.get('is_available', False) 
-            if soft_deleted == 'on':
-                soft_deleted = True
-            else:
-                soft_deleted = False
 
-            product = Product(
-                Product_name = product_name,
-                slug = slug,
-                category = category, 
-                brand = brand, 
-                description = description,
-                price =  price,
-                main_image = main_image,
-                max_price = max_price,
-                quantity = quantity,
-                is_available = is_available,
-                soft_deleted = soft_deleted
-                )
-            product.save()
+            try:
+                price = float(request.POST['price'])
+                max_price = float(request.POST['max_price'])
+                quantity = int(request.POST['quantity'])
 
-            product_image = Product_image()
-            product_image.image2 = request.FILES.get('image2')
-            product_image.image3 = request.FILES.get('image3')
-            product_image.image4 = request.FILES.get('image4')
-            product_image.image5 = request.FILES.get('image5')
+                if price < 0 or max_price < 0 or quantity < 0:
+                    messages.error(request, 'Price, max price, and quantity must be non-negative.')
+                else:
+                    if Product.objects.filter(Product_name=product_name).exists():
+                        messages.error(request, 'A product with this name already exists.')
+                        
+                    slug = slugify(product_name)
+                    category_id = request.POST['category']
+                    category = Category.objects.get(id=category_id)
+                    brand = request.POST['brand']
+                    description = request.POST['description']
+                    price = request.POST['price']
+                    main_image = request.FILES.get('main_image')
+                    max_price = request.POST['max_price']
+                    quantity = request.POST['quantity']
+                    is_available = request.POST.get('is_available') == 'True' 
+                    if is_available == 'on':
+                        is_available = True
+                    else:
+                        is_available = False 
+                    soft_deleted = request.POST.get('is_available', False) 
+                    if soft_deleted == 'on':
+                        soft_deleted = True
+                    else:
+                        soft_deleted = False
 
-            product.save()
-            product_image.product = product
-            product_image.save()
+                        product = Product(
+                            Product_name = product_name,
+                            slug = slug,
+                            category = category, 
+                            brand = brand, 
+                            description = description,
+                            price =  price,
+                            main_image = main_image,
+                            max_price = max_price,
+                            quantity = quantity,
+                            is_available = is_available,
+                            soft_deleted = soft_deleted
+                            )
+                        product.save()
 
-            return redirect('adminside:show-product')  
+                        product_image = Product_image()
+                        product_image.image2 = request.FILES.get('image2')
+                        product_image.image3 = request.FILES.get('image3')
+                        product_image.image4 = request.FILES.get('image4')
+                        product_image.image5 = request.FILES.get('image5')
+
+                        product.save()
+                        product_image.product = product
+                        product_image.save()
+                        return redirect('adminside:show-product') 
+
+            except ValueError:
+                messages.error(request, 'Invalid price, max price, or quantity.')      
+
+             
 
         return render(request, "adminside/addproduct.html", {"categories": categories })
     else:
@@ -262,8 +275,66 @@ def delete_product(request, product_id):
     
 
 
-
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+@user_passes_test(is_superuser)
 def admin_orders(request):
-    orders = OrderProduct.objects.all()
+    
+    ordered_products = OrderProduct.objects.all()
 
-    return render(request, 'adminside/orders.html', {'orders':orders})
+    return render(request, 'adminside/orders.html', {'ordered_products':ordered_products})
+
+
+
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+@user_passes_test(is_superuser)
+def admin_orders_details(request, order_number):
+    try:
+        order = Order.objects.get(order_number=order_number)
+        ordered_products = OrderProduct.objects.filter(order=order)
+    except Exception as e:
+        print(e)
+    
+
+    context = {               
+        'order': order,
+        'ordered_products': ordered_products,
+    }
+    return render(request, 'adminside/admin_order_details.html', context)
+
+def delivered_order(request, order_number):
+    order = Order.objects.get(order_number=order_number)
+    order.status = 'Delivered'
+    order.save()
+    return redirect('adminside:admin-orders')
+
+
+
+
+
+def add_variations(request):
+   
+    product = Product.objects.all()
+
+    if request.method == 'POST':
+        product_id = request.POST['product']
+        product = Product.objects.get(id=product_id)
+        variation_category = request.POST['category']
+        variation_value = request.POST['variation_value']
+        is_active = request.POST.get('is_active') == 'True' 
+        if is_active == 'on':
+            is_active = False
+        else:
+            is_active = True
+
+        Variation.objects.create(product = product, variation_category = variation_category, variation_value = variation_value, is_active = is_active )
+
+        return redirect('adminside:dashboard')
+
+    
+
+    context = {
+        'products': product,
+        'variation_category_choices': variation_category_choice,
+    }
+
+    return render(request, 'adminside/add_variations.html', context)

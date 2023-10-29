@@ -1,0 +1,45 @@
+{% extends "userprofile/user_profile_base.html" %}
+
+
+
+{% block usercontent %}
+<div class=" mb-3 mb-lg-0">
+    <a href="{% url 'userprofile:user-add-address' %}" class="btn btn-success btn-small">Add Address</a>
+</div>
+
+<div class="my-4"></div> 
+
+<div class="row">
+    {% for address in addressess   %}
+    <div class="col-lg-6">
+        <div class="card mb-3 mb-lg-4"> 
+            <div class="card-header">
+                <h5 class="mb-0">Your Address</h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text mb=0">{{address.name}}</p>
+                <p class="card-text mb=0">{{address.full_address}}</p>   
+                <p class="card-text mb=0">{{address.city}}, {{address.state}}</p>  
+                <p class="card-text mb=0">{{address.country}}</p>
+                <p class="card-text mb=0">{{address.email}}</p>
+                <p class="card-text mb=0">{{address.phone}}</p>
+                <p class="card-text mb=0">{{address.pincode}}</p>
+                <a href= "{% url 'userprofile:edit-address' address.id %}" class="btn-small">Edit</a>
+                <span class="space">&nbsp;</span> 
+                <span class="space">&nbsp;</span> 
+                <span class="space">&nbsp;</span> 
+                <span class="space">&nbsp;</span> 
+                <span class="space">&nbsp;</span> 
+                <span class="space">&nbsp;</span> 
+                <span class="space">&nbsp;</span> 
+                <span class="space">&nbsp;</span> 
+                <span class="space">&nbsp;</span> 
+                <span class="space">&nbsp;</span> 
+                <a href= "{% url 'delete_address' address.id %}" class="btn-small">Delete</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

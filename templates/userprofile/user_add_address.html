@@ -1,0 +1,47 @@
+{% extends "userprofile/user_profile_base.html" %}
+
+
+
+{% block usercontent %}
+
+<form  method="POST"> 
+    {% csrf_token %}
+<div class="row">
+    <div class="col-md-6 form-group">
+        <label>Name</label>
+        <input class="form-control" type="text" name="name" placeholder="John">
+    </div>
+    <div class="col-md-6 form-group">
+        <label>Mobile No</label>
+        <input class="form-control" name="phone" type="text" placeholder="+123 456 789">
+    </div>
+    <div class="col-md-6 form-group">
+        <label>Address Line 1</label>
+        <input class="form-control" name="address_line_1" type="text" placeholder="123 Street">
+    </div>
+    <div class="col-md-6 form-group">
+        <label>Address Line 2</label>
+        <input class="form-control" name="address_line_2" type="text" placeholder="123 Street">
+    </div>
+    <div class="col-md-6 form-group">
+        <label>Country</label>
+        <input class="form-control" name="country" type="text" placeholder="India">
+    </div>
+    <div class="col-md-6 form-group">
+        <label>City</label>
+        <input class="form-control" name="city" type="text" placeholder="New York">
+    </div>
+    <div class="col-md-6 form-group">
+        <label>State</label>
+        <input class="form-control" name="state" type="text" placeholder="New York">
+    </div>
+    <div class="col-md-6 form-group">
+        <label>ZIP Code</label>
+        <input class="form-control" name="pincode" type="text" placeholder="123">
+    </div>
+</div>
+<button type="submit" class="btn btn-primary">
+    Create address
+</button>
+</form>
+{% endblock %}

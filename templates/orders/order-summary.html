@@ -29,15 +29,13 @@
                     <div class="card">
                         <h5 class="card-header">Billing Address</h5>
                         <div class="card-body">
-                          <p class="card-text mb=0">{{order.full_name}}</p>
-                          <p class="card-text mb=0">{{order.full_address}}</p>   
-                          <p class="card-text mb=0">{{order.city}}, {{order.state}}</p>  
-                          <p class="card-text mb=0">{{order.country}}</p>
-                          <p class="card-text mb=0">{{order.email}}</p>
-                          <p class="card-text mb=0">{{order.phone}}</p>
-                          {% if order.order_note %}
-                            <b>Order Note:</b>{{order.order_note}}
-                          {% endif %}  
+                          <p class="card-text mb=0">{{address.name}}</p>
+                          <p class="card-text mb=0">{{address.full_address}}</p>   
+                          <p class="card-text mb=0">{{address.city}}, {{order.state}}</p>  
+                          <p class="card-text mb=0">{{address.country}}</p>
+                          <p class="card-text mb=0">{{address.email}}</p>
+                          <p class="card-text mb=0">{{address.phone}}</p>
+                          <p class="card-text mb=0">{{address.pincode}}</p> 
                         </div>
                     </div>
                     <div class="card">
@@ -103,14 +101,13 @@
                     </div>
 
                     <div class="bt-1 border-color-1 mt-30 mb-30"></div>
-                    <form action="{% url 'place-order' id=order.id %}" method="POST">
+                    <form action="{% url 'place-order'  %}" method="POST">
                         {% csrf_token %}
                         <div class="payment_method">
                             <div class="mb-25">
                                 <h5>Payment</h5>
                             </div>
                             <div class="payment_option">
-                                <input hidden name="order_number" id="order_number" type="text" value="{{order.order_number}}">
 
                                 {% for method in paymentmethods %}
                                    {% if method.method_name != 'WALLET' %}

@@ -1,11 +1,13 @@
 from django import forms
-from .models import Order
+from userside.models import AddressBook
 
 
-class OrderForm(forms.ModelForm):
+class addressbook_form(forms.ModelForm):
     class Meta:
-        model = Order
-        fields = ['first_name', 'last_name', 'phone', 'email', 'address_line_1', 'address_line_2', 'country', 'state', 'city', 'post_code', 'order_note']
+        model = AddressBook
+        fields = '__all__'
+        exclude = ['created_at', 'user',
+                   'updated_at', 'is_default', 'is_active']
 
 
     

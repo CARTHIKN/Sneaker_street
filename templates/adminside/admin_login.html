@@ -27,7 +27,7 @@
             <div class="card mx-auto card-login">
                 <div class="card-body">
                     <h4 class="card-title mb-4">Sign in</h4>
-                    <form method="post" action="{% url 'adminside:admin-login' %}">
+                    <form method="post" action="{% url 'adminside:adminlogin' %}">
                         {% csrf_token %}
                         <div class="mb-3">
                             <input class="form-control" placeholder="email" type="email" name="email" >

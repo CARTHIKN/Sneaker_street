@@ -49,29 +49,30 @@
                             <th scope="col">Total</th>
                             <th scope="col">Status</th>
                             <th scope="col">Date</th>
-                            {% comment %} <th scope="col" class="text-end"> Action </th> {% endcomment %}
+                            <th scope="col" class="text-end"> Action </th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for order in orders %}
+                        {% for ordered_product in ordered_products %}
                         <tr>
-                            <td>{{order.id}}</td>
-                            <td><b>{{order.user.username}}</b></td>
-                            <td>{{order.user.email}}</td>
-                            <td>{{order.product_price}}</td>
-                            <td><span class="badge rounded-pill alert-warning">{{order.order.status}}</span></td>
-                            <td>{{order.created_at}}</td>
-                            {% comment %} <td class="text-end">
-                                <a href="#" class="btn btn-md rounded font-sm">Detail</a>
+                            <td>{{ordered_product.id}}</td>
+                            <td><b>{{ordered_product.user.username}}</b></td>
+                            <td>{{ordered_product.user.email}}</td>
+                            <td>{{ordered_product.product_price}}</td>
+                            <td><span class="badge rounded-pill alert-warning">{{ordered_product.order.status}}</span></td>
+                            <td>{{ordered_product.created_at}}</td>
+                            <td class="text-end">
                                 <div class="dropdown">
                                     <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm"> <i class="material-icons md-more_horiz"></i> </a>
                                     <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="#">View detail</a>
-                                        <a class="dropdown-item" href="#">Edit info</a>
-                                        <a class="dropdown-item text-danger" href="#">Delete</a>
+                                        <a class="dropdown-item" href= "{% url 'adminside:admin-orders-details' order_number=ordered_product.order.order_number %}">View detail</a>
+                                        {% if ordered_product.order.status == 'Accepted' %}
+                                        <a class="dropdown-item" href="{% url 'adminside:delivered-order' order_number=ordered_product.order.order_number %}">Mark as Delivered</a>
+                                        {% endif %}
+                                       
                                     </div>
                                 </div> <!-- dropdown //end -->
-                            </td> {% endcomment %}
+                            </td> 
                         </tr>
                         {% endfor %}
                     </tbody>

@@ -1,0 +1,78 @@
+{% extends "adminside\base1.html" %}
+
+{% block title %} Dashboard{% endblock title %}
+
+{% block content %}
+
+
+<section class="content-main">
+    <div class="row">
+        <div class="col-6">
+            <div class="content-header">
+                <h2 class="content-title">Add Variations</h2>
+               
+
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <form method="post" enctype="multipart/form-data" >
+        {% csrf_token %}
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="row">
+                            <div class="mb-4">
+                                <label class="form-label">Product</label>
+                                <select class="form-select" name = "product">
+                                    {% for product in products  %}
+                                    <option value = {{product.id}}>{{product.Product_name}}</option>
+                                    {% endfor %}
+                                    
+                                    
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Product</label>
+                                <select class="form-select" name = "category">
+                                    {% for choice in variation_category_choices  %}
+                                    <option value = {{ choice.0 }}>{{choice.0}}</option>
+                                    {% endfor %}
+                                    
+                                    
+                                </select>
+                            </div>
+                             <!-- col.// -->
+                        </div>
+                        
+                        <div class="col-md-9">
+                            <div class="mb-4">
+                                <label class="form-label">Variation Value</label>
+                                <input type="text" placeholder="Type here" class="form-control" name = "variation_value" >
+                            </div>
+                           
+                    
+                    <div class="mb-4">
+                        <input class="form-check-input" type="checkbox" checked name = "is_active"  >
+
+                        <label> Is Active </label>
+                    </div>
+
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                    <button class="btn btn-primary" type="submit">Add variations</button>
+                   <!-- .row end// -->
+                </div>
+            
+            </div>
+        </div>
+    </div>
+</form>
+    </div>
+</section>
+
+{% endblock %}

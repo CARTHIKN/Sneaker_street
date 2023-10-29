@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from urllib import request
 from django.http import HttpResponse
 from django.shortcuts import render, redirect,get_object_or_404
@@ -14,6 +15,8 @@ from django.core.mail import send_mail
 import random
 from django.views.decorators.cache import never_cache
 import requests
+from django.utils import timezone
+from django.views.decorators.cache import cache_control
 
 
 
@@ -25,11 +28,12 @@ import requests
 
 
 # Create your views here.
-
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def landing_page(request):
     
     products = Product.objects.all()
     return render(request,'index.html', {'products':products})
+
 
 @never_cache
 def user_login(request):
@@ -107,7 +111,7 @@ def user_login(request):
 
 
     
-@never_cache
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def signup(request):
     if request.method == "POST":
             username = request.POST['username']
@@ -150,7 +154,7 @@ def signup(request):
 
 
 
-@never_cache
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def signout(request):
     if request.user.is_authenticated:
         logout(request)
@@ -184,7 +188,7 @@ def verify_otp(request):
 
     return render(request, 'otp.html')
 
-
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def product_details(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     in_cart = CartItem.objects.filter(cart__cart_id =_cart_id(request), product=product).exists()
@@ -196,58 +200,92 @@ def product_details(request, product_id):
 
     return render(request, 'productdetails.html', context)
 
-
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def search(request):
     return HttpResponse("search page")
 
+
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def forgotPassword(request):
-        if request.method == "POST":
-            email = request.POST['email']
-            if UserProfile.objects.filter(email=email).exists():
-                # Generate a random OTP (you can customize the length)
-                otp = ''.join(random.choice('0123456789') for i in range(6))
+    if request.method == "POST":
+        email = request.POST.get('email', '')  # Ensure email is a string
 
-                # Send the OTP to the user's email
-                subject = 'Password Reset OTP'
-                message = f'Your OTP for password reset is: {otp}'
-                from_email = 'carthikn1920@gmail.com'  # Change this to your email address
-                recipient_list = [email]
+        if UserProfile.objects.filter(email=email).exists():
+            last_sent_time_str = request.session.get('otp_sent_time')
 
-                send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+            if last_sent_time_str:
+                last_sent_time = datetime.strptime(last_sent_time_str, '%Y-%m-%d %H:%M:%S.%f%z')
+                elapsed_time = timezone.now() - last_sent_time
 
-                # Store the OTP in the session
-                request.session['reset_otp'] = otp
-                request.session['reset_email'] = email
+                if elapsed_time.total_seconds() < 120:
+                    messages.error(request, 'Please wait before requesting a new OTP.')
+                    return redirect('forgotPassword')
 
-                # Redirect to the OTP verification page
-                return redirect('password-verify-otp')
+            # Generate a random OTP (you can customize the length)
+            otp = ''.join(random.choice('0123456789') for i in range(6))
 
-            else:
-                messages.error(request, 'Account does not exist')
-    
-        return render(request, 'forgotpassword.html')
+            # Send the OTP to the user's email
+            subject = 'Password Reset OTP'
+            message = f'Your OTP for password reset is: {otp}'
+            from_email = 'carthikn1920@gmail.com'  
+            recipient_list = [email]
+
+            send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+
+            # Store the OTP in the session
+            request.session['reset_otp'] = otp
+            request.session['reset_email'] = email
+            request.session['otp_sent_time'] = timezone.now().strftime('%Y-%m-%d %H:%M:%S.%f%z')
+
+            # Redirect to the OTP verification page
+            return redirect('password-verify-otp')
+
+        else:
+            messages.error(request, 'Account does not exist')
+
+    context = {
+    'otp_expired': False,  # Set to True if OTP has expired
+    }
+
+    return render(request, 'forgotpassword.html', context)
 
 
 
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def password_verify_otp(request):
     if 'reset_otp' in request.session and 'reset_email' in request.session:
+        stored_otp = request.session['reset_otp']
+        email = request.session['reset_email']
+        otp_sent_time_str = request.session.get('otp_sent_time')
 
+        if not otp_sent_time_str:
+            messages.error(request, 'OTP has expired. Please request a new one.')
+            return redirect('forgotPassword')
+
+        otp_sent_time = datetime.strptime(otp_sent_time_str, '%Y-%m-%d %H:%M:%S.%f%z')
+        elapsed_time = timezone.now() - otp_sent_time
+
+        if elapsed_time.total_seconds() >= 120:
+            messages.error(request, 'OTP has expired. Please request a new one.')
+            request.session['otp_expired'] = True  # Mark OTP as expired
+            return redirect('forgotPassword')
 
         if request.method == "POST":
             entered_otp = request.POST.get('otp', '')
-            stored_otp = request.session['reset_otp']
-            email = request.session['reset_email']
-
             if entered_otp == stored_otp:
-               
+                # Valid OTP; proceed with password reset
                 del request.session['reset_otp']
+                del request.session['otp_sent_time']
                 request.session['reset_email'] = email
-                
-                return redirect(reset_password)
+                request.session['otp_verified'] = True  # Mark OTP as verified
+                return redirect('reset-Password')
             else:
-                messages.error(request, "Invalid OTP. Please try again.")
+                messages.error(request, 'Invalid OTP. Please try again.')
+    context = {
+    'otp_expired': False,  # Set to True if OTP has expired
+    }
+    return render(request, 'otp.html', context)
 
-    return render(request, 'otp.html')
 
 
 def reset_password(request):
@@ -268,5 +306,7 @@ def reset_password(request):
                 return redirect(user_login)
             
         return render(request, 'reset.html')
+    else:
+        messages.error(request, 'Session data missing. Please request OTP again.')
+        return redirect('forgotPassword')
     
-
