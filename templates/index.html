@@ -206,24 +206,10 @@
                     <div class="header-right">
                         <div class="search-style-2">
                             <form action="{% url 'search' %}" style="width:80%" class="search" method="GET">
-                                <select class="select-active">
-                                    <option>All Categories</option>
-                                    <option>Women's</option>
-                                    <option>Men's</option>
-                                    <option>Cellphones</option>
-                                    <option>Computer</option>
-                                    <option>Electronics</option>
-                                    <option> Accessories</option>
-                                    <option>Home & Garden</option>
-                                    <option>Luggage</option>
-                                    <option>Shoes</option>
-                                    <option>Mother & Kids</option>
-                                </select>
                                 <input type="text" placeholder="Search for items..." name="keyword">
                                 <button class="btn btn-primary" type="submit">
-                                    <i class="fa fa-search"></i>
+                                    <i class="fa fa-search" style="opacity: 1;"></i>
                                 </button>
-                            </form>
                         </div>
                         <div class="header-action-right">
                             <div class="header-action-2">
@@ -257,8 +243,13 @@
                                 <span class="fi-rs-apps"></span> Browse Categories
                             </a>
                             <div class="categori-dropdown-wrap categori-dropdown-active-large">
+                            {% for cat in categories %}
+                                <ul class="categories">
+                                    <li><a href="{% url 'shop-product-by-category' category_slug=cat.slug %}">{{cat.Category_name}}</a></li>
+                                </ul>
+                            {% endfor %}
                                 <ul>
-                                    <li class="has-children">
+                                    {% comment %} <li class="has-children">
                                         <a href="shop-grid-right.html"><i class="evara-font-dress"></i>Women's Clothing</a>
                                         <div class="dropdown-menu">
                                             <ul class="mega-menu d-lg-flex">
@@ -428,9 +419,9 @@
                                             <li><a href="shop-grid-right.html"><i class="evara-font-diamond"></i>Consumer Electronics</a></li>
                                             <li><a href="shop-grid-right.html"><i class="evara-font-home"></i>Automobiles & Motorcycles</a></li>
                                         </ul>
-                                    </li>
+                                    </li> {% endcomment %}
                                 </ul>
-                                <div class="more_categories">Show more...</div>
+                                
                             </div>
                         </div>
                         <div class="main-menu main-menu-padding-1 main-menu-lh-2 d-none d-lg-block">

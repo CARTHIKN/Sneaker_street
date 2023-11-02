@@ -34,7 +34,8 @@ from django.db.models import Q
 def landing_page(request):
     
     products = Product.objects.all()
-    return render(request,'index.html', {'products':products})
+    categories = Category.objects.all()
+    return render(request,'index.html', {'products':products, 'categories':categories})
 
 
 @never_cache
@@ -219,13 +220,10 @@ def search(request):
     else:
         product_count = 0  # Handle the case when 'keyword' is not in request.GET
 
-    context = {
-        'products': products,
-        'categories': categories,
-        'product_count': product_count,
-    }
-
-    return render(request, 'page-shop.html', context)
+    products_list = [product.id for product in products]
+    request.session['product_id'] = products_list
+    
+    return redirect('shop-product')
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def forgotPassword(request):
@@ -334,20 +332,19 @@ def reset_password(request):
     
 
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)  
-def shop_product(request):
+def shop_product(request, att='id'):
     products=Product.objects.all().filter(is_available=True).order_by('id')
+    if 'product_id' in request.session:
+        pk_key = request.session['product_id']
+        products = Product.objects.filter(id__in=pk_key)
+    categories=Category.objects.all()
+    print(att)
+    # sorting_order = request.GET.get('sort', 'default')  # 'default' is the default sorting order
+    products = products.order_by(att)
     paginator=Paginator(products,6)
     page=request.GET.get('page')
-    paged_products=paginator.get_page(page)
     product_count=products.count()
-    categories=Category.objects.all()
-
-    sorting_order = request.GET.get('sort', 'default')  # 'default' is the default sorting order
-
-    if sorting_order == 'low_to_high':
-        products = products.order_by('price')
-    elif sorting_order == 'high_to_low':
-        products = products.order_by('-price')
+    paged_products=paginator.get_page(page)
         
     context={
         'products':paged_products,
@@ -360,41 +357,41 @@ def shop_product(request):
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)  
 def shop_product_by_category(request, category_slug):
-    category = get_object_or_404(Category, slug=category_slug)
-    products = Product.objects.filter(category=category, is_available=True)
-    paginator=Paginator(products,6)
-    page=request.GET.get('page')
-    paged_products=paginator.get_page(page)
-    product_count=products.count()
-    product_count = products.count()
-    categories = Category.objects.all()
-    context = {
-        'products': paged_products,
-        'product_count': product_count,
-        'categories': categories,
-        'selected_category': category,  # Optional: To highlight the selected category
-    }
-    return render(request, 'page-shop.html', context)
+    try:
+        category = get_object_or_404(Category, slug=category_slug)
+        products = Product.objects.filter(category=category, is_available=True)
+    except:
+        products = Product.objects.filter(is_available=True)
 
-def filters(request):
-    categories = Category.objects.all()
-    sort_by = request.GET.get('sort', 'featured')  # Default to 'featured' if no sorting parameter is provided
+    products_list = [product.id for product in products]
+    request.session['product_id'] = products_list
+    return redirect('shop-product')
 
-    if sort_by == 'price_low_high':
-        products = Product.objects.order_by('price')  # Order by price (low to high)
-        product_count=products.count()
-    elif sort_by == 'price_high_low':
-        products = Product.objects.order_by('-price')  # Order by price (high to low)
-        product_count=products.count()
-    else:
-        # Default to featured order or other sorting logic you have
-        products = Product.objects.all()
+# def filters(request):
 
-    context = {
-        'products': products,
-         'categories': categories,
-         'product_count': product_count,
-        # Other context data you might have
-    }
 
-    return render(request, 'page-shop.html', context)
+#     products = Product.objects.all()
+#     # categories = Category.objects.all()
+#     if 'product_id' in  request.session:
+#         pk_key = request.session['product_id']
+#         products = Product.objects.filter(id__in=pk_key)
+
+#     sort_by = request.GET.get('sort', 'featured')  # Default to 'featured' if no sorting parameter is provided
+
+#     if sort_by == 'price_low_high':
+#         products = Product.objects.order_by('price')  # Order by price (low to high)
+#         product_count=products.count()
+#     elif sort_by == 'price_high_low':
+#         products = Product.objects.order_by('-price')  # Order by price (high to low)
+#         product_count=products.count()
+#     else:
+#         # Default to featured order or other sorting logic you have
+
+#     context = {
+#         'products': products,
+#          'categories': categories,
+#          'product_count': product_count,
+#         # Other context data you might have
+#     }
+
+#     return render(request, 'page-shop.html', context)
