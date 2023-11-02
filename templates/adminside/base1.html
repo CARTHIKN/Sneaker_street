@@ -21,6 +21,13 @@
 </head>
 
 <body>
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
     <div class="screen-overlay"></div>
     <aside class="navbar-aside" id="offcanvas_aside">
         <div class="aside-top">
@@ -72,6 +79,7 @@
                     <div class="submenu">
                         <a href="{% url 'adminside:add-product' %}">Add product </a>
                         <a href="{% url 'adminside:add-variations' %}">Add Variations</a>
+                        <a href="{% url 'adminside:add-coupon' %}">Add Coupon</a>
 
                     </div>
                    

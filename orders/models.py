@@ -31,6 +31,20 @@ class Payment(models.Model):
     return self.payment_id
     
 
+
+class Coupon(models.Model):
+   coupon_code = models.CharField(max_length=50, unique=True)
+   discount = models.DecimalField(max_digits=10, decimal_places=0)
+   valid_from = models.DateTimeField()
+   valid_to = models.DateTimeField()
+   active = models.BooleanField(default=True)
+   minimum_amount = models.IntegerField(default=500)
+
+   def __str__(self):
+       return self.coupon_code
+
+
+
 class Order(models.Model):
     STATUS = (
         ('New', 'New'),
@@ -42,6 +56,9 @@ class Order(models.Model):
 
     user = models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True)
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)
+    coupon = models.ForeignKey(Coupon, on_delete=models.DO_NOTHING, null=True)#NEED TO REMOVE THE NULL=TRUE WHENEVER I TRUNCATE THE DATABASE
+    wallet_discount = models.IntegerField(null=True, default=0)
+    coupon_discount = models.IntegerField(null=True, default=0)
     order_number = models.CharField(max_length=20)
     shipping_address = models.ForeignKey(
         AddressBook, on_delete=models.SET_NULL, null=True)

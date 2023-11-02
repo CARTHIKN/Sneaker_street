@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin-orders-details/<int:order_number>', views.admin_orders_details, name='admin-orders-details'),
     path('delivered-order/<int:order_number>/', views.delivered_order, name='delivered-order'),
     path('adminadd_variations/', views.add_variations, name='add-variations'),
+    path('adminadd_coupon/', views.add_coupon, name='add-coupon'),
 
 
     

@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate,login,logout
 from django.utils.text import slugify
 from django.views.decorators.cache import cache_control
 from django.contrib.auth.decorators import user_passes_test
-from orders.models import Order, OrderProduct, variation_category_choice
+from orders.models import Coupon, Order, OrderProduct, variation_category_choice
 # Create your views here.
 
 def is_superuser(user):
@@ -160,9 +160,16 @@ def add_product(request):
                     description = request.POST['description']
                     price = request.POST['price']
                     main_image = request.FILES.get('main_image')
+                    additional_images = request.FILES.getlist('additional_images')
                     max_price = request.POST['max_price']
                     quantity = request.POST['quantity']
                     is_available = request.POST.get('is_available') == 'True' 
+                    if main_image == None:
+                        messages.warning(request, "Upload a main img")
+                        return redirect('adminside:add-product')
+                    if len(additional_images) != 4 or any(image is None for image in additional_images):
+                         messages.error(request, 'You must provide exactly 4 additional images, and none of them should be empty.')
+                         return redirect('adminside:add-product')
                     if is_available == 'on':
                         is_available = True
                     else:
@@ -186,13 +193,27 @@ def add_product(request):
                             is_available = is_available,
                             soft_deleted = soft_deleted
                             )
-                        product.save()
+                        # product.save()
 
                         product_image = Product_image()
-                        product_image.image2 = request.FILES.get('image2')
-                        product_image.image3 = request.FILES.get('image3')
-                        product_image.image4 = request.FILES.get('image4')
-                        product_image.image5 = request.FILES.get('image5')
+
+                        for i, image in enumerate(additional_images[:4]):
+                            
+
+                            if i == 0:
+                                product_image.image2 = image
+                            elif i == 1:
+                                product_image.image3 = image
+                            elif i == 2:
+                                product_image.image4 = image
+                            elif i == 3:
+                                product_image.image5 = image
+                                
+                            
+                        # product_image.image2 = image2
+                        # product_image.image3 = image3
+                        # product_image.image4 = image4
+                        # product_image.image5 = image5
 
                         product.save()
                         product_image.product = product
@@ -338,3 +359,24 @@ def add_variations(request):
     }
 
     return render(request, 'adminside/add_variations.html', context)
+
+
+def add_coupon(request):
+    if request.method == "POST":
+        coupon_code = request.POST['coupon_code']
+        discount = request.POST['discount']
+        valid_from = request.POST['valid_from']
+        valid_to = request.POST['valid_to']
+        active = request.POST['active'] == 'True' 
+        if active == 'on':
+            active = False
+        else:
+            active = True
+        minimum_amount = request.POST['minimum_amount']
+
+        coupon = Coupon.objects.create(coupon_code=coupon_code, discount=discount, valid_from=valid_from, valid_to=valid_to, active=active, minimum_amount=minimum_amount)
+
+        coupon.save()
+        messages.success(request, 'coupon added successfully')
+        return redirect('adminside:dashboard')
+    return render(request, 'adminside/add_coupon.html')

@@ -1,6 +1,8 @@
+from decimal import Decimal
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
+from orders.models import Coupon
 from userside.models import AddressBook, Product,Variation
 from . models import Cart, CartItem
 from django.contrib.auth.decorators import login_required
@@ -24,68 +26,61 @@ def _cart_id(request):
 
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)  
-def add_cart(request,id):
+def add_cart(request, id):
     current_user = request.user
-    product=Product.objects.get(id=id)
+    product = Product.objects.get(id=id)
 
-    #if the user is authenticated
     if current_user.is_authenticated:
-        product_variation = []
+        selected_variations = []
+
         if request.method == "POST":
             for item in request.POST:
                 key = item
                 value = request.POST[key]
-                
+
                 try:
                     variation = Variation.objects.get(product=product, variation_category__iexact=key, variation_value__iexact=value)
-                    product_variation.append(variation)
-                except:
-                    pass    
+                    selected_variations.append(variation)
+                except Variation.DoesNotExist:
+                    pass
 
+            # Get the cart items for the current user
+            cart_items = CartItem.objects.filter(product=product, user=current_user)
 
-            is_cart_item_exists = CartItem.objects.filter(product=product, user=current_user).exists()
-            
-            if is_cart_item_exists:
-                cart_item = CartItem.objects.filter(product=product, user=current_user)
-                ex_var_list = []
-                id = []
-                for item in cart_item:
-                    existing_variation = item.variations.all()
-                    ex_var_list.append(list(existing_variation))
-                    id.append(item.id)
+            matching_cart_item = None
 
-                if product_variation in ex_var_list:
-                    #increase the cart item quantity
-                    index = ex_var_list.index(product_variation)
-                    item_id = id[index]
-                    item = CartItem.objects.get(product=product, id=item_id)
-                    if item.quantity < product.quantity:
-                        item.quantity += 1
-                        product.quantity-=1
-                        item.save()
-                    else:
-                        messages.warning(request, "This product is out of stock.")
-                   
+            for cart_item in cart_items:
+                # Check if the selected variations match the variations in the cart
+                if list(cart_item.variations.all()) == selected_variations:
+                    matching_cart_item = cart_item
+                    break
+
+            # If a matching cart item is found, increment its quantity
+            if matching_cart_item:
+                if matching_cart_item.quantity < product.quantity:
+                    matching_cart_item.quantity += 1
+                    product.quantity -= 1
+                    matching_cart_item.save()
                 else:
-                    item = CartItem.objects.create(product=product, quantity=1, user=current_user)
-                    if len(product_variation) > 0:
-                        item.variations.clear()
-                        item.variations.add(*product_variation)
-                    item.save()
-            else:
-                cart_item = CartItem.objects.create(
-                    product = product,
-                    quantity = 1,
-                    user=current_user,
-                )
-                if len(product_variation) > 0:
-                    cart_item.variations.clear()
-                    cart_item.variations.add(*product_variation)
-                cart_item.save()        
+                    messages.warning(request, "This product is out of stock.")
+                return redirect('cart')
+
+            # If no matching cart item is found, create a new one
+            cart_item = CartItem.objects.create(
+                product=product,
+                quantity=1,
+                user=current_user
+            )
+            
+            cart_item.variations.add(*selected_variations)
+            cart_item.save()
+
             return redirect('cart')
         else:
             messages.info(request, "The product is out of stock.")
             return redirect('cart')
+
+
         
     #if the user is not authenticated    
     else:       
@@ -204,8 +199,8 @@ def cart(request, total=0, quantity=0, cart_items=None, tax=0, grand_total=0):
             total += (cart_item.product.price * cart_item.quantity)
             quantity += cart_item.quantity
 
-        tax = (2 * total)/100
-        grand_total = total + tax
+        # tax = (2 * total)/100
+        # grand_total = total + tax
     except:
         pass
 
@@ -233,10 +228,14 @@ def checkout(request, total=0, quantity=0, cart_items=None, tax=0, grand_total=0
             total += (cart_item.product.price * cart_item.quantity)
             quantity += cart_item.quantity
 
-        tax = (2 * total)/100
-        grand_total = total + tax
+        # tax = (2 * total)/100
+        # grand_total = total + tax
     except:
         pass
+
+    coupon = None
+    avlb_coupons = Coupon.objects.filter(active = True)
+    coupon_discount = Decimal(0)
 
     try:
         addresses = AddressBook.objects.filter(user=request.user,is_active=True)
@@ -252,6 +251,9 @@ def checkout(request, total=0, quantity=0, cart_items=None, tax=0, grand_total=0
         'tax':tax,
         'grand_total':grand_total,
         'addresses' : addresses,
+        'coupon': coupon,
+        'coupon_discount': float(coupon_discount),
+        'available_coupons':avlb_coupons,
 
     }
     return render(request, 'cart/checkout.html',context)

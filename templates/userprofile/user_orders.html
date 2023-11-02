@@ -23,14 +23,14 @@
                     </thead>
 
                     
-                    {% for orderproduct in orderproducts  %}
+                    {% for order in orders  %}
                     <tbody>
                         <tr>
-                            <td>#{{orderproduct.order.order_number}}</td>
-                            <td>{{orderproduct.created_at}}</td>
-                            <td>{{orderproduct.order.status}}</td>
-                            <td>{{orderproduct.order.order_total}}</td>
-                            <td><a href="{% url 'user-order-details' order_number=orderproduct.order.order_number %}" class="btn-small d-block">view</a></td>
+                            <td>#{{order.order_number}}</td>
+                            <td>{{order.created_at}}</td>
+                            <td>{{order.status}}</td>
+                            <td>{{order.order_total}}</td>
+                            <td><a href="{% url 'user-order-details' order_number=order.order_number %}" class="btn-small d-block">view</a></td>
                         </tr>
                         {% endfor %}
                         

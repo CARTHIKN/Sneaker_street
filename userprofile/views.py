@@ -114,7 +114,8 @@ def user_orders(request):
     # Query the orders for the logged-in user
     selected_menu = 'orders'
     orderroducts = OrderProduct.objects.filter(user=request.user).order_by('-created_at')
-    orders = Order.objects.filter(user=request.user)
+    orders = Order.objects.filter(user=request.user).exclude(status="New").order_by('-created_at')
+
 
 
     return render(request, 'userprofile/user_orders.html', {'orders': orders, 'orderproducts':orderroducts, 'selected_menu': selected_menu,})

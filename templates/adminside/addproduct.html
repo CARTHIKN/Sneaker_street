@@ -86,13 +86,14 @@
                         <div class="col-md-9">
                             <div class="mb-4">
                                
-                                <label class="form-label">Images</label>
-                                
+                                <label class="form-label"> Main Image</label>
                                 <input type="file" name="main_image" {% if product.main_image %} {% endif %}>
-                                <input type="file" name="image2">
-                                <input type="file" name="image3">
-                                <input type="file" name="image4">
-                                <input type="file" name="image5">
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Additional Images (Up to 4)</label>
+                                <input type="file" name="additional_images" multiple>
+                                
                             </div>
                         </div>
 

@@ -157,4 +157,6 @@ STATICFILES_DIRS=[
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+RAZORPAY_KEY_ID = 'rzp_test_2Ppy65nLGqi9SS'
+RAZORPAY_KEY_SECRET = 'qVSdJRKkjbSDCdcXigEo68bs'
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"

@@ -3,7 +3,22 @@
 {% block title %} Dashboard{% endblock title %}
 
 {% block content %}
-
+{% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    <script>
+        // Automatically hide messages after 5 seconds
+        setTimeout(function() {
+            var messageContainer = document.querySelector('.messages');
+            if (messageContainer) {
+                messageContainer.style.display = 'none';
+            }
+        }, 5000); // 5000 milliseconds (5 seconds)
+    </script>
+{% endif %}
 <section class="content-main">
     <div class="content-header">
         <div>
@@ -471,5 +486,6 @@
         </nav>
     </div>
 </section> 
+
 
 {% endblock content %}

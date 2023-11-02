@@ -4,17 +4,18 @@ from django.shortcuts import redirect, render
 from django.http import HttpResponse, HttpResponseRedirect
 from carts.models import CartItem
 from orders.forms import addressbook_form
-from .models import Order, PaymentMethod, Payment, OrderProduct
+from .models import Coupon, Order, PaymentMethod, Payment, OrderProduct
 import datetime
 from userside.models import Product, Variation
 from django.views.decorators.cache import cache_control
 from userside.models import *
+from django.conf import settings
+import razorpay
 # Create your views here.
 
 
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def order_summary(request, total=0, quantity=0):
-    print('oiwjgrasasfdhkajsfdhkasjdf')
     current_user = request.user
 
     #if the cart count is less than or equal to 0, then redirect back to landing page
@@ -28,14 +29,24 @@ def order_summary(request, total=0, quantity=0):
     for cart_item in cart_items:
         total += (cart_item.product.price * cart_item.quantity)
         quantity += cart_item.quantity
-        
-    
-
     print(f'grand_total')
-
-
-    
     if request.method == 'POST':
+        
+        coupon_discount = 0
+        coupon_code = request.POST.get('coupon','')
+        print(coupon_code)
+        coupon = None
+        if coupon_code:
+            try:
+              coupon = Coupon.objects.get(coupon_code = coupon_code)
+              coupon_discount = coupon.discount
+              request.session['coupon'] = float(coupon_discount)
+              total -= float(coupon_discount)
+            except Exception as e:
+              
+              print(e)
+
+              
         user = UserProfile.objects.get(email=request.user)
         try:
             address = AddressBook.objects.get(user=user, is_default=True)
@@ -47,7 +58,7 @@ def order_summary(request, total=0, quantity=0):
         context = {
             'paymentmethods':PaymentMethod.objects.all(),
             'cart_items':cart_items,
-            'total':total,
+            'total':float(total),
             'address':address
             
             }
@@ -55,7 +66,7 @@ def order_summary(request, total=0, quantity=0):
             
     
     else:
-        return redirect('landing')
+       return redirect('checkout')
     
 
 
@@ -68,7 +79,7 @@ def place_order(request, total=0, quantity=0):
   cart_count = cart_items.count()
   if cart_count <=0:
     return redirect('landing')
-  
+     
 
   grand_total =  0
   tax = 0 
@@ -76,8 +87,8 @@ def place_order(request, total=0, quantity=0):
     total += (cart_item.product.price * cart_item.quantity)
     quantity += cart_item.quantity
 
-  tax = (2*total)/100
-  grand_total = total + tax
+  # tax = (2*total)/100
+  # grand_total = total + tax
 
   order = None
   payment_method = None 
@@ -85,14 +96,24 @@ def place_order(request, total=0, quantity=0):
 
     user = current_user
     
-    payment_option = request.POST['payment_option']
+    payment_option = request.POST.get('payment_option')  # Use get() to provide a default value ('') if 'payment_option' is not in the request
+    if not payment_option:
+        messages.error(request, "Please choose a payment method")
+        return redirect('order-summary')
+    
     payment_method = PaymentMethod.objects.get(method_name=payment_option)
-    order_total = grand_total
+    order_total = total
     tax = tax
     ip = request.META.get('REMOTE_ADDR')
     shipping_address = AddressBook.objects.get(user=current_user, is_default = True)
     
-    order = Order.objects.create(user = user, order_total = order_total, tax = tax, ip = ip, shipping_address = shipping_address )
+    order = Order.objects.create(user = user,  tax = tax, ip = ip, order_total = order_total, shipping_address = shipping_address )
+
+    if request.session['coupon']:
+       order.coupon_discount = int(request.session['coupon'])
+       order.order_total -=  order.coupon_discount
+    else:
+       order.order_total = order_total
 
 
     #generate order number
@@ -103,17 +124,12 @@ def place_order(request, total=0, quantity=0):
     current_date = d.strftime("%Y%m%d")
     order_number = current_date + str(order.id)
     order.order_number = order_number
-    order.shipping_address = shipping_address
     order.save()
-
-    if not payment_option:
-      messages.error(request, "please choose a payment method")
-      return redirect('order_summary')
 
     try:
       payment_method = PaymentMethod.objects.get(method_name=payment_option)
       order = Order.objects.get(user = request.user, is_ordered = False, order_number = order_number)
-         
+         #coupon
     except Exception as e:
       
       print(e)
@@ -121,12 +137,14 @@ def place_order(request, total=0, quantity=0):
     if order is not None:
             order.save()
     
-
     try:
       if total == 0:
         raise Exception  
       if payment_option == 'COD':
         payment = False
+      elif payment_option == 'RAZORPAY':
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+        payment = client.order.create({'amount':float(order.order_total)*100, "currency":"INR"})
       else:
         payment = False
     except:
@@ -138,12 +156,13 @@ def place_order(request, total=0, quantity=0):
     context = {
       'order':order,
       'cart_items':cart_items,
-      'total':total,
+      'total':total-order.coupon_discount,
       'success_url':success_url,
       'failed_url':failed_url,
       'payment_method':payment_method,
       'payment':payment,
       'address':address,
+      'grandtotal': grand_total,
     }  
     print(payment)  
     print(payment_method) 
@@ -166,6 +185,9 @@ def payment_success(request):
   payment_id = request.GET.get('payment_id')
   payment_order_id = request.GET.get('payment_order_id')
   order_id = request.GET.get('order_id')
+  discount = 0
+  if request.session['coupon']:
+      discount = int(request.session['coupon'])
 
   if method == 'COD':
     try:
@@ -175,14 +197,14 @@ def payment_success(request):
       return redirect('landing')
      
     payment_method_is_active =  PaymentMethod.objects.filter(method_name=method, is_active=True)
-    
+
     if payment_method_is_active.exists():
       payment = Payment(
         user = request.user,
         payment_id = 'PID_COD'+ order_id,
         payment_order_id = order_id,
         payment_method = payment_method_is_active[0],
-        amount_paid = order.order_total,
+        amount_paid = order.order_total-discount,
         status = 'SUCCESS'
       )
       payment.save()
@@ -241,65 +263,66 @@ def payment_success(request):
       messages.error(request, "Invalid Payment Method Found")
       return redirect('payment-failed')
 
-#   elif method == 'RAZORPAY':
-#     order = Order.objects.get(user = request.user, is_ordered = False, order_number = order_id)
-#     payment_method_is_active = PaymentMethod.objects.filter(method_name = method, is_active = True)
+  elif method == 'RAZORPAY':
+    order = Order.objects.get(user = request.user, is_ordered = False, order_number = order_id)
+    payment_method_is_active = PaymentMethod.objects.filter(method_name = method, is_active = True)
 
-    # if payment_method_is_active.exists():
-    #   payment = Payment(
-    #     user = request.user,
-    #     payment_id = payment_id,
-    #     payment_order_id = payment_order_id,
-    #     payment_method = payment_method_is_active[0],
-    #     amount_paid = order.order_total,
-    #     status = 'SUCCESS',
-    #   )
-    #   payment.save()
+    if payment_method_is_active.exists():
+      payment = Payment(
+        user = request.user,
+        payment_id = payment_id,
+        payment_order_id = payment_order_id,
+        payment_method = payment_method_is_active[0],
+        amount_paid = order.order_total-discount,
+        status = 'SUCCESS',
+      )
+      payment.save()
 
-    #   wallet = Wallet.objects.get(user=request.user, is_active = True)
-    #   wallet.balance = wallet.balance - order.wallet_discount
-    #   wallet.save()
+      # wallet = Wallet.objects.get(user=request.user, is_active = True)
+      # wallet.balance = wallet.balance - order.wallet_discount
+      # wallet.save()
 
-    #   wallet_transaction = WalletTransaction.objects.create(
-    #     wallet = wallet,
-    #     transaction_type = 'DEBIT',
-    #     order = order,
-    #     transaction_detail = str(order.order_number),
-    #     amount = order.wallet_discount
-    #   )
-    #   wallet_transaction.save()
+      # wallet_transaction = WalletTransaction.objects.create(
+      #   wallet = wallet,
+      #   transaction_type = 'DEBIT',
+      #   order = order,
+      #   transaction_detail = str(order.order_number),
+      #   amount = order.wallet_discount
+      # )
+      # wallet_transaction.save()
 
-    #   order.payment = payment
-    #   order.is_ordered = True
-    #   order.save()
+      order.payment = payment
+      order.is_ordered = True
+      order.status = "Accepted"
+      order.save()
 
-    #   cart_items = CartItem.objects.filter(user = request.user)
+      cart_items = CartItem.objects.filter(user = request.user)
 
-    #   for item in cart_items:
-    #     orderproduct = OrderProduct()
-    #     orderproduct.order= order
-    #     orderproduct.user = request.user
-    #     orderproduct.product = item.product
-    #     orderproduct.quantity = item.quantity
-    #     orderproduct.product_price = item.product.price
+      for item in cart_items:
+        orderproduct = OrderProduct()
+        orderproduct.order= order
+        orderproduct.user = request.user
+        orderproduct.product = item.product
+        orderproduct.quantity = item.quantity
+        orderproduct.product_price = item.product.price
 
-    #     orderproduct.ordered = True
-    #     orderproduct.save()
-    #     orderproduct.variation.set(item.variations.all())
+        orderproduct.ordered = True
+        orderproduct.save()
+        orderproduct.variation.set(item.variations.all())
 
-    #     product = Product.objects.get(id=item.product_id)
-    #     product.quantity -= item.quantity
-    #     product.save()
+        product = Product.objects.get(id=item.product_id)
+        product.quantity -= item.quantity
+        product.save()
 
-    #   CartItem.objects.filter(user=request.user).delete()
+      CartItem.objects.filter(user=request.user).delete()
 
-    #   request.session["order_number"] = order_id
-    #   request.session["payment_id"] = payment_id
-    #   return redirect('orders:payment-success-page')
+      request.session["order_number"] = order_id
+      request.session["payment_id"] = payment_id
+      return redirect('payment-success-page')
       
-    # else:
-    #   messages.error(request, "Invalid Payment Method Found")
-    #   return redirect('payment-failed')
+    else:
+      messages.error(request, "Invalid Payment Method Found")
+      return redirect('payment-failed')
     
 #   elif method == 'WALLET':
 #     payment_method_is_active = PaymentMethod.objects.filter(method_name = method, is_active = True)
@@ -358,6 +381,9 @@ def payment_success(request):
     
   else:
     return redirect('user-profile')   
+  
+
+
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)      
 def payment_failed(request):
   return HttpResponse('failed')
@@ -394,7 +420,7 @@ def user_order_details(request, order_number):
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def order_cancel_user(request,order_number):
   order = Order.objects.get(order_number=order_number)
-  orderproduct = OrderProduct.objects.get(order=order)
+  # orderproduct = OrderProduct.objects.get(order=order)
   if not order.status == 'Cancelled':
     order.status = 'Cancelled'
     order.save()

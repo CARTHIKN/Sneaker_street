@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import UserProfile, Product, Product_image
+from .models import Category, UserProfile, Product, Product_image
 from django.contrib.auth import authenticate,login,logout
 from django.core.mail import send_mail
 import pyotp
@@ -17,6 +17,8 @@ from django.views.decorators.cache import never_cache
 import requests
 from django.utils import timezone
 from django.views.decorators.cache import cache_control
+from django.core.paginator import Paginator
+from django.db.models import Q
 
 
 
@@ -200,10 +202,30 @@ def product_details(request, product_id):
 
     return render(request, 'productdetails.html', context)
 
-@cache_control(no_cache=True,must_revalidate=True,no_store=True)
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def search(request):
-    return HttpResponse("search page")
+    categories = Category.objects.all()
+    products = []
 
+    if 'keyword' in request.GET:
+        keyword = request.GET['keyword']
+        if keyword:
+            products = Product.objects.order_by('-is_available').filter(
+                Q(description__icontains=keyword) | Q(Product_name__icontains=keyword)
+            )
+            product_count = products.count()  
+        else:
+            product_count = 0  # Handle the case when no keyword is provided
+    else:
+        product_count = 0  # Handle the case when 'keyword' is not in request.GET
+
+    context = {
+        'products': products,
+        'categories': categories,
+        'product_count': product_count,
+    }
+
+    return render(request, 'page-shop.html', context)
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def forgotPassword(request):
@@ -310,3 +332,69 @@ def reset_password(request):
         messages.error(request, 'Session data missing. Please request OTP again.')
         return redirect('forgotPassword')
     
+
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)  
+def shop_product(request):
+    products=Product.objects.all().filter(is_available=True).order_by('id')
+    paginator=Paginator(products,6)
+    page=request.GET.get('page')
+    paged_products=paginator.get_page(page)
+    product_count=products.count()
+    categories=Category.objects.all()
+
+    sorting_order = request.GET.get('sort', 'default')  # 'default' is the default sorting order
+
+    if sorting_order == 'low_to_high':
+        products = products.order_by('price')
+    elif sorting_order == 'high_to_low':
+        products = products.order_by('-price')
+        
+    context={
+        'products':paged_products,
+        'product_count':product_count,
+        'categories':categories,
+
+    }
+    return render(request, 'page-shop.html',context)
+
+
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)  
+def shop_product_by_category(request, category_slug):
+    category = get_object_or_404(Category, slug=category_slug)
+    products = Product.objects.filter(category=category, is_available=True)
+    paginator=Paginator(products,6)
+    page=request.GET.get('page')
+    paged_products=paginator.get_page(page)
+    product_count=products.count()
+    product_count = products.count()
+    categories = Category.objects.all()
+    context = {
+        'products': paged_products,
+        'product_count': product_count,
+        'categories': categories,
+        'selected_category': category,  # Optional: To highlight the selected category
+    }
+    return render(request, 'page-shop.html', context)
+
+def filters(request):
+    categories = Category.objects.all()
+    sort_by = request.GET.get('sort', 'featured')  # Default to 'featured' if no sorting parameter is provided
+
+    if sort_by == 'price_low_high':
+        products = Product.objects.order_by('price')  # Order by price (low to high)
+        product_count=products.count()
+    elif sort_by == 'price_high_low':
+        products = Product.objects.order_by('-price')  # Order by price (high to low)
+        product_count=products.count()
+    else:
+        # Default to featured order or other sorting logic you have
+        products = Product.objects.all()
+
+    context = {
+        'products': products,
+         'categories': categories,
+         'product_count': product_count,
+        # Other context data you might have
+    }
+
+    return render(request, 'page-shop.html', context)
