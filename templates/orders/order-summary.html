@@ -90,7 +90,8 @@
                                     </tr>
                                     <tr>
                                         <td class="cart_total_label">Total</td>
-                                        <td class="cart_total_amount"><strong><span class="font-xl fw-900 text-brand">${{total}}</span></strong></td>
+                                        <td class="cart_total_amount"><strong> <span id="totalAmount" class="font-xl fw-900 text-brand">{{total}}</span></strong></td>
+                                       
                                     </tr>
                                 </tbody>
                             </table>
@@ -108,6 +109,8 @@
                                 <h5>Payment</h5>
                             </div>
                             <div class="payment_option">
+                                <input hidden name="order_number" id="order_number" type="text" value="{{order.order_number}}">
+
 
                                 {% for method in paymentmethods %}
                                    {% if method.method_name != 'WALLET' %}
@@ -174,34 +177,24 @@
 
 
 <script>
-    function wallet_balance_add()
-    {
-        console.log("wallet_balance_add function called")
-        if (document.getElementById('wallet_balance').checked) 
-        {
-            console.log("hiiiii");
-            document.getElementById('wallet_balance').value = 1
-            get_wallet_grand_total(document.getElementById('order_number').value)
-
-
+    function wallet_balance_add() {
+        if (document.getElementById('wallet_balance').checked) {
+            document.getElementById('wallet_balance').value = 1;
+            get_wallet_grand_total(document.getElementById('order_number').value, true);
         } else {
-            document.getElementById('wallet_balance').value = 0
-            get_wallet_grand_total(document.getElementById('order_number').value,false)
-            console.log("haiii")
-            document.getElementById('id_payment_div_RAZORPAY').disabled = false
-            document.getElementById('id_payment_div_COD').disabled = false
-            document.getElementById('id_payment_div_WALLET').disabled = true
+            document.getElementById('wallet_balance').value = 0;
+            get_wallet_grand_total(document.getElementById('order_number').value, false);
+            document.getElementById('id_payment_div_RAZORPAY').disabled = false;
+            document.getElementById('id_payment_div_COD').disabled = false;
+            document.getElementById('id_payment_div_WALLET').disabled = true;
         }
     }
-
-
     
-    function get_wallet_grand_total(order_number,check=true)
-    {
-        var data ={
-            'order_number':order_number,
-            'check':check
-        }
+    function get_wallet_grand_total(order_number, check = true) {
+        var data = {
+            'order_number': order_number,
+            'check': check
+        };
         $.ajax({
             type: "GET",
             url: "/wallet/getwallet_total",
@@ -211,32 +204,28 @@
             },
             success: (data) => {
                 if (data.status === "success") {
-                    console.log(data);
-                    document.getElementById('wallet_updated_balance').innerHTML = data.wallet_balance
-                    document.getElementById('grand_total_update').innerHTML     = data.grand_total
-                    if (data.grand_total == 0)
-                    {
-                        document.getElementById('id_payment_div_RAZORPAY').disabled = true
-                        document.getElementById('id_payment_div_COD').disabled      = true
-                        document.getElementById('id_payment_div_WALLET').disabled   = false
+                    document.getElementById('wallet_updated_balance').innerHTML = data.wallet_balance;
+                    var totalAmount = data.grand_total; // Store the total amount
+                    document.getElementById('totalAmount').innerHTML = totalAmount; // Update the total amount in the HTML
+                    document.getElementById('grand_total_update').innerHTML = totalAmount; // Update the total amount within the pay button
+                    if (totalAmount == 0) {
+                        document.getElementById('id_payment_div_RAZORPAY').disabled = true;
+                        document.getElementById('id_payment_div_COD').disabled = true;
+                        document.getElementById('id_payment_div_WALLET').disabled = false;
                     }
-                    
-
-
                 } else {
-                    // Password change error
                     console.log(data);
                 }
-        
             },
             error: (xhr, status, error) => {
-                // Display the error message on the page
                 console.log("error");
-                console.log(error);
             }
         });
-
-
     }
+    
+    
 </script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 {% endblock %}

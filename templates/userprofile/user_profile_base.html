@@ -19,6 +19,8 @@
 
                                 <li {% if selected_menu == 'address' %} class="selected" style="background-color: #f0f0f0; min-height: 45px; display: flex; align-items: center;" {% endif %} style="min-height: 45px; display: flex; align-items: center; min-height: 45px; display: flex; align-items: center;"><a href="{% url 'userprofile:user-address' %}?menu_item=address"><i class="fi-rs-marker mr-10"></i> MY ADDRESS</a></li>
 
+                                <li  style="min-height: 45px;display: flex; align-items: center; "><a href=" {% url 'wallet' %} "><i class="fas fa-wallet mr-10"></i> WALLET </a></li>
+
 
                                 <li  style="min-height: 45px;display: flex; align-items: center; "><a href="{% url 'signout' %} "><i class="fi-rs-sign-out mr-10"></i> LOG OUT</a></li>
                                 <!-- Add more sections as needed -->
@@ -77,6 +79,7 @@
 <script src="assets/js/plugins/jquery.theia.sticky.js"></script>
 <!-- Template  JS -->
 <script src="assets/js/main.js"></script>
+<script src="https://kit.fontawesome.com/400fcdfbd4.js" crossorigin="anonymous"></script>
 </body>
 
 

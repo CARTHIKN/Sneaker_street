@@ -121,7 +121,7 @@
                     <div class="header-action-right">
                         <div class="search-style-2">
                            <form action="{% url 'search' %}" style="width:80%" class="search" method="GET">
-                                <select class="select-active">
+                                {% comment %} <select class="select-active">
                                     <option>All Categories</option>
                                     <option>Women's</option>
                                     <option>Men's</option>
@@ -133,7 +133,7 @@
                                     <option>Luggage</option>
                                     <option>Shoes</option>
                                     <option>Mother & Kids</option>
-                                </select>
+                                </select> {% endcomment %}
                                 <input type="text" placeholder="Search for items..." name="keyword">
                                 <button class="btn btn-primary" type="submit">
                                     <i class="fa fa-search"></i>
@@ -282,6 +282,7 @@
     <!-- Template  JS -->
     <script src={% static "assets/js/main.js" %}></script>
     <script src={% static "assets/js/shop.js" %}></script>
+    <script src="https://kit.fontawesome.com/400fcdfbd4.js" crossorigin="anonymous"></script>
 
 </footer>
     
