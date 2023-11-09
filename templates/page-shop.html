@@ -141,6 +141,8 @@
                                 <li><a href="{% url 'shop-product-by-category' category_slug=cat.slug %}">{{cat.Category_name}}</a></li>
                             </ul>
                             {% endfor %}
+
+                            
                         {% comment %} </div>
                         <!-- Fillter By Price -->
                         {% comment %}  {% endcomment %}
@@ -196,6 +198,41 @@
                             </div>
                         </div>
                     </div> {% endcomment %} 
+                </div>
+                <div class="sidebar-widget price_range range mb-30">
+                    <div class="widget-header position-relative mb-20 pb-10">
+                        <h5 class="widget-title mb-10">FILTER</h5>
+                        <div class="bt-1 border-color-1"></div>
+                    </div>
+                    <form method="get" action="{% url 'shop-product' %}">
+                    <div>
+                        <label for="color">Color:</label>
+                        <input type="text" name="color" >
+                        {% comment %} <select name="color" id="color">
+                            <option value="">Select</option>
+                            <option value="Red">Red</option>
+                            <option value="blue">Blue</option>
+                            
+                            <!-- Add more color options as needed -->
+                        </select> {% endcomment %}
+                    </div>
+                       
+                    <div style="margin-top:40px; margin-bottom:40px">
+                        <label for="size">Size:</label>
+                        <select name="size" id="size">
+                            <option value="">All</option>
+                            <option value="small">Small</option>
+                            <option value="medium">Medium</option>
+                            <option value="large">Large</option>
+                            <option value="xlarge">XLarge</option>
+                            <!-- Add more size options as needed -->
+                        </select>
+                    </div>
+                        
+                    
+                        <input type="submit" value="Filter">
+                    </form>
+                    
                 </div>
             </div>
         </section>

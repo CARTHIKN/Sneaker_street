@@ -108,17 +108,23 @@ def change_password(request):
 
     return render(request, 'userprofile/change_password.html')
 
+
+
 @login_required
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def user_orders(request):
     # Query the orders for the logged-in user
-    selected_menu = 'orders'
-    orderroducts = OrderProduct.objects.filter(user=request.user).order_by('-created_at')
-    orders = Order.objects.filter(user=request.user).exclude(status="New").order_by('-created_at')
+    if request.user.is_authenticated and  not request.user.is_superuser :
+    
+        selected_menu = 'orders'
+        orderroducts = OrderProduct.objects.filter(user=request.user).order_by('-created_at')
+        orders = Order.objects.filter(user=request.user).exclude(status="New").order_by('-created_at')
 
 
 
-    return render(request, 'userprofile/user_orders.html', {'orders': orders, 'orderproducts':orderroducts, 'selected_menu': selected_menu,})
+        return render(request, 'userprofile/user_orders.html', {'orders': orders, 'orderproducts':orderroducts, 'selected_menu': selected_menu,})
+    else:
+        return redirect('landing')
 
 
 
@@ -168,7 +174,7 @@ def edit_address(request, address_id):
 
     return render(request, 'userprofile/edit_address.html', context)
 
-
+@login_required
 def user_add_address(request):
     if request.method == "POST":
         form = addressbook_form(request.POST)

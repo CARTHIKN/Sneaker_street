@@ -11,6 +11,7 @@ from userside.models import Product, Variation
 from django.views.decorators.cache import cache_control
 from userside.models import *
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 import razorpay
 # Create your views here.
 
@@ -459,7 +460,7 @@ def payment_success_page(request):
   return render(request, 'orders/payment-success-page.html')
 
 
-
+@login_required
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def user_order_details(request, order_number):
     try:
@@ -475,6 +476,7 @@ def user_order_details(request, order_number):
     return render(request, 'userprofile/order-details.html', context)
 
 
+@login_required
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def order_cancel_user(request,order_number):
   order = Order.objects.get(order_number=order_number)

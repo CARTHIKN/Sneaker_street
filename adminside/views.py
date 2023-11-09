@@ -6,6 +6,7 @@ from django.utils.text import slugify
 from django.views.decorators.cache import cache_control
 from django.contrib.auth.decorators import user_passes_test
 from orders.models import Coupon, Order, OrderProduct, variation_category_choice
+from django.utils import timezone
 # Create your views here.
 
 def is_superuser(user):
@@ -24,8 +25,8 @@ def admin_login(request):
                 login(request,user)
                 return redirect('adminside:dashboard')
             else :
-                messages.success(request,'Invalid credentials')
-                return redirect(admin_login)      
+                messages.error(request,'Invalid credentials')
+                return render(request, 'adminside/admin_login.html')      
         else:
             return render(request, 'adminside/admin_login.html')
 
@@ -373,6 +374,19 @@ def add_coupon(request):
         else:
             active = True
         minimum_amount = request.POST['minimum_amount']
+        if int(discount)  <= 0 or  int(minimum_amount) <= 0:
+            messages.error(request, 'discount and minimumum amount cannnot be zero or negative values')
+            return render(request, 'adminside/add_coupon.html')
+        
+        valid_from = timezone.make_aware(
+            timezone.datetime.strptime(valid_from.replace('T', ' '), 
+            '%Y-%m-%d %H:%M'))
+        valid_to = timezone.make_aware(timezone.datetime.strptime(valid_to.replace('T', ' '), '%Y-%m-%d %H:%M'))
+
+
+        if valid_to <= valid_from:
+            messages.error(request, 'Valid to date cannot be lesser than or equal to Valid from date')
+            return render(request, 'adminside/add_coupon.html')
 
         coupon = Coupon.objects.create(coupon_code=coupon_code, discount=discount, valid_from=valid_from, valid_to=valid_to, active=active, minimum_amount=minimum_amount)
 

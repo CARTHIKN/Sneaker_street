@@ -211,10 +211,14 @@ def search(request):
     if 'keyword' in request.GET:
         keyword = request.GET['keyword']
         if keyword:
-            products = Product.objects.order_by('-is_available').filter(
-                Q(description__icontains=keyword) | Q(Product_name__icontains=keyword)
-            )
-            product_count = products.count()  
+            # Modify the search query to include product name, description, color variations, and size variations
+            products = Product.objects.filter(
+                Q(Product_name__icontains=keyword) |
+                Q(description__icontains=keyword) |
+                (Q(variation__variation_category='color', variation__variation_value__icontains=keyword) |
+                Q(variation__variation_category='size', variation__variation_value__icontains=keyword))
+            ).distinct()
+            product_count = products.count()
         else:
             product_count = 0  # Handle the case when no keyword is provided
     else:
@@ -222,8 +226,10 @@ def search(request):
 
     products_list = [product.id for product in products]
     request.session['product_id'] = products_list
-    
+
     return redirect('shop-product')
+
+
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def forgotPassword(request):
@@ -333,13 +339,48 @@ def reset_password(request):
 
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)  
 def shop_product(request, att='id'):
+
+
+    color_filter = request.GET.get('color')
+    size_filter = request.GET.get('size')
+
+
+
+    # request.session['color_filter'] = False
+    # request.session['size_filter'] = False
+    if color_filter:
+        request.session['color_filter'] = color_filter
+
+    if size_filter:
+        request.session['size_filter'] = size_filter
+
+    color_filter = request.session.get('color_filter')
+    size_filter = request.session.get('size_filter')
+    
+
     products=Product.objects.all().filter(is_available=True).order_by('id')
+
+
     if 'product_id' in request.session:
         pk_key = request.session['product_id']
         products = Product.objects.filter(id__in=pk_key)
     categories=Category.objects.all()
     print(att)
     # sorting_order = request.GET.get('sort', 'default')  # 'default' is the default sorting order
+
+    if color_filter:
+        products = products.filter(
+            variation__variation_category='color', 
+            variation__variation_value__iexact=color_filter
+            )
+
+    if size_filter:
+        products = products.filter(
+            variation__variation_category='size', 
+            variation__variation_value__iexact=size_filter
+            )
+
+
     products = products.order_by(att)
     paginator=Paginator(products,6)
     page=request.GET.get('page')
@@ -363,6 +404,8 @@ def shop_product_by_category(request, category_slug):
     except:
         products = Product.objects.filter(is_available=True)
 
+    request.session['color_filter'] = False
+    request.session['size_filter'] = False
     products_list = [product.id for product in products]
     request.session['product_id'] = products_list
     return redirect('shop-product')
