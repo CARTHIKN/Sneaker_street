@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import UserProfile,Category,Product,Product_image,Variation, AddressBook
+from .models import UserProfile,Category,Product,Product_image,Variation, AddressBook,Review
 
 class VariationAdmin(admin.ModelAdmin):
     list_display =('product', 'variation_category', 'variation_value', 'is_active')
@@ -12,4 +12,4 @@ admin.site.register(Product)
 admin.site.register(Product_image)
 admin.site.register(Variation,VariationAdmin)
 admin.site.register(AddressBook)
-
+admin.site.register(Review)

@@ -1,0 +1,101 @@
+{% extends "adminside\base1.html" %}
+
+{% block title %} Dashboard{% endblock title %}
+
+{% block content %}
+
+
+<section class="content-main">
+    <div class="row">
+        <div class="col-6">
+            <div class="content-header">
+                <h2 class="content-title">{% if edit_mode %} Update Category Offer {% else %} Add Category Offer {% endif %}</h2>
+               
+
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        
+                        <div class="col-md-9">
+                            <div class="mb-4">
+                                <label class="form-label">Offer Name</label>
+                                <input type="text" placeholder="Type here" class="form-control" name = "offer_name" required  value="{% if edit_mode %}{{ category_offer.offer_name }}{% endif %}"  >
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Expire Date:</label>
+                                <input type="date" placeholder="Type here" class="form-control" name = "expire_date" required   value="{% if edit_mode %}{{ category_offer.expire_date|date:'Y-m-d'  }}{% endif %}">
+                            </div>
+                        </div> <!-- col.// -->
+                    </div> <!-- row.// -->
+                
+                    <div class="row">
+                        
+                        <div class="col-md-9">
+                            <div class="mb-4">
+                                <label class="form-label">Discount Percentage</label>
+                                <input type="number" placeholder="Type here" class="form-control" name = "discount_percentage" required   value="{% if edit_mode %}{{ category_offer.discount_percentage }}{% endif %}">
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Category Offer Image</label>
+                                <input type="file" class="form-control" name = "category_offer_image" >
+                            </div>
+                            <div class="mb-4">
+                               
+                                <input type="checkbox"  name = "is_active" checked  >
+                                <label class="form-label">Is Active:</label>
+                            </div>
+                        </div> <!-- col.// -->
+                    </div> <!-- row.// -->
+                    <div class="row">
+                        <div class="mb-4">
+                            <label class="form-label">Category</label>
+                            <select class="form-select" name = "category">
+                                {% for category in categories  %}
+                                <option  value="{{ category.id }}"
+                                {% if edit_mode and category.id == category_offer.category.id %}selected{% endif %}>{{category.Category_name}}</option>
+                                {% endfor %}
+                                
+                                
+                            </select>
+                        </div>
+                         <!-- col.// -->
+                    </div>
+                    
+                    {% if messages %}
+                        <ul class="messages">
+                            {% for message in messages %}
+                                {% if message.tags == 'error' %}
+                                    <div class="alert alert-{{message.tags}} custom-error-message alert-dismissible fade show" role="alert">
+                                        <strong></strong>{{message}}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <button class="btn btn-primary" type="submit"> {% if edit_mode %} Update Offer {% else %} Add Offer {% endif %}</button>
+                   <!-- .row end// -->
+                </div>
+            
+            </div>
+        </div>
+    </div>
+</form>
+    </div>
+</section>
+
+
+<style>
+.custom-error-message {
+    background-color: #ffcccc;  /* Replace with your preferred shade of red */
+}
+
+</style>
+{% endblock %}

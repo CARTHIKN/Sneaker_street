@@ -18,6 +18,8 @@ urlpatterns = [
     path('forgotPassword/', views.forgotPassword, name='forgotPassword'),
     path('password_verify_otp', views.password_verify_otp, name ="password-verify-otp"),
     path('reset-Password/', views.reset_password, name='reset-Password'),
+    path('add_review/<int:product_id>/', views.add_review, name='add_review'),
+
     # path('filter-by/', views.filters, name='filters'),
 
     

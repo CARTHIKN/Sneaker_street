@@ -2,6 +2,9 @@ from typing import Self
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin,Group, Permission
 from django.db import models
 from django.utils.text import slugify
+from django.urls import reverse
+from datetime import datetime
+import uuid
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -25,6 +28,8 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=30,unique=True,blank=False)
     email = models.EmailField(unique=True)
     phone= models.CharField(max_length=15, blank=False,default='')
+    referral_id = models.UUIDField(max_length=8, default=uuid.uuid4, unique=True, null=True, blank=True)
+
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_blocked = models.BooleanField(default=False)
@@ -119,11 +124,60 @@ class Product(models.Model):
     quantity = models.IntegerField() 
     is_available = models.BooleanField(default=True)
     soft_deleted = models.BooleanField(default=False)
+    reviews = models.ManyToManyField('Review', blank=True, related_name='product_reviews')
+
+    def get_url(self):
+         return reverse('product-details', args=[self.id])
    
     
     def __str__(self):
         return self.Product_name 
     
+
+    def product_price(self):
+        offer_percentage = 0
+
+        if self.category.categoryoffer_set.filter(is_active=True, expire_date__gte=datetime.now()).exists():
+            offer_percentage = self.category.categoryoffer_set.filter(is_active=True, expire_date__gte=datetime.now()).values_list('discount_percentage',flat=True).order_by('-discount_percentage').first()
+        if self.productoffer_set.filter(is_active=True, expire_date__gte=datetime.now()).exists():
+            offer_percentage = offer_percentage + self.productoffer_set.filter(is_active=True, expire_date__gte=datetime.now()).values_list('discount_percentage',flat=True).order_by('-discount_percentage').first()  
+
+
+        if offer_percentage >= 100:
+            offer_percentage = 100
+            
+
+        offer_price = self.price -  self.price * (offer_percentage) / (100)
+
+        return round(offer_price)
+    
+    def offer_percentage(self):
+        offer_percentage = 0
+
+        if self.category.categoryoffer_set.filter(is_active=True, expire_date__gte=datetime.now()).exists():
+            offer_percentage = self.category.categoryoffer_set.filter(is_active=True, expire_date__gte=datetime.now()).values_list('discount_percentage',flat=True).order_by('-discount_percentage').first()
+        if self.productoffer_set.filter(is_active=True, expire_date__gte=datetime.now()).exists():
+            offer_percentage = offer_percentage + self.productoffer_set.filter(is_active=True, expire_date__gte=datetime.now()).values_list('discount_percentage',flat=True).order_by('-discount_percentage').first()  
+
+
+        if offer_percentage >= 100:
+            offer_percentage = 100
+            
+        return round(offer_percentage)   
+    
+
+class Review(models.Model):
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, related_name='reviews_product')
+    comment = models.TextField()
+    star_rating = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+      
+
+    def __str__(self):
+        return f"{self.user.username} - {self.product.Product_name}"
+
+
 
 class VariationManager(models.Manager):
     def colors(self):
@@ -164,3 +218,8 @@ class Product_image(models.Model):
     def __str__(self):
         return self.image2.name 
 
+
+
+
+
+    

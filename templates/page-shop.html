@@ -75,7 +75,11 @@
                                             <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
                                         </div>
                                         <div class="product-badges product-badges-position product-badges-mrg">
-                                            <span class="hot">Hot</span>
+                                            {% if product.offer_percentage > 0 %}
+                                            <span class="hot">{{ product.offer_percentage }}%</span>
+                                            {% else %}
+                                            <span class="hot">New</span>
+                                            {% endif %}
                                         </div>
                                     </div>
                                     <div class="product-content-wrap">
@@ -89,7 +93,7 @@
                                             </span>
                                         </div>
                                         <div class="product-price">
-                                            <span>Rs:{{ product.price}}</span>
+                                            <span>Rs:{{product.product_price}}</span>
                                             <span class="old-price">{{product.max_price}}</span>
                                         </div>
                                         <div class="product-action-1 show">
@@ -143,61 +147,6 @@
                             {% endfor %}
 
                             
-                        {% comment %} </div>
-                        <!-- Fillter By Price -->
-                        {% comment %}  {% endcomment %}
-                        <!-- Product sidebar Widget -->
-                        {% comment %} <div class="sidebar-widget product-sidebar  mb-30 p-30 bg-grey border-radius-10">
-                            <div class="widget-header position-relative mb-20 pb-10">
-                                <h5 class="widget-title mb-10">New products</h5>
-                                <div class="bt-1 border-color-1"></div>
-                            </div>
-                            <div class="single-post clearfix">
-                                <div class="image">
-                                    <img src="{% static "assets/imgs/shop/thumbnail-3.jpg" %}" alt="#">
-                                </div>
-                                <div class="content pt-10">
-                                    <h5><a href="shop-product-detail.html">Chen Cardigan</a></h5>
-                                    <p class="price mb-0 mt-5">$99.50</p>
-                                    <div class="product-rate">
-                                        <div class="product-rating" style="width:90%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="single-post clearfix">
-                                <div class="image">
-                                    <img src="{% static "assets/imgs/shop/thumbnail-4.jpg" %}" alt="#">
-                                </div>
-                                <div class="content pt-10">
-                                    <h6><a href="shop-product-detail.html">Chen Sweater</a></h6>
-                                    <p class="price mb-0 mt-5">$89.50</p>
-                                    <div class="product-rate">
-                                        <div class="product-rating" style="width:80%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="single-post clearfix">
-                                <div class="image">
-                                    <img src="{% static "assets/imgs/shop/thumbnail-5.jpg" %}" alt="#">
-                                </div>
-                                <div class="content pt-10">
-                                    <h6><a href="shop-product-detail.html">Colorful Jacket</a></h6>
-                                    <p class="price mb-0 mt-5">$25</p>
-                                    <div class="product-rate">
-                                        <div class="product-rating" style="width:60%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> {% endcomment %}
-                        {% comment %} <div class="banner-img wow fadeIn mb-45 animated d-lg-block d-none">
-                            <img src="{% static "assets/imgs/banner/banner-11.jpg" %}" alt="">
-                            <div class="banner-text">
-                                <span>Women Zone</span>
-                                <h4>Save 17% on <br>Office Dress</h4>
-                                <a href="shop-grid-right.html">Shop Now <i class="fi-rs-arrow-right"></i></a>
-                            </div>
-                        </div>
-                    </div> {% endcomment %} 
                 </div>
                 <div class="sidebar-widget price_range range mb-30">
                     <div class="widget-header position-relative mb-20 pb-10">
@@ -208,13 +157,7 @@
                     <div>
                         <label for="color">Color:</label>
                         <input type="text" name="color" >
-                        {% comment %} <select name="color" id="color">
-                            <option value="">Select</option>
-                            <option value="Red">Red</option>
-                            <option value="blue">Blue</option>
-                            
-                            <!-- Add more color options as needed -->
-                        </select> {% endcomment %}
+                       
                     </div>
                        
                     <div style="margin-top:40px; margin-bottom:40px">

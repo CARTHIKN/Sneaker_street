@@ -50,8 +50,9 @@
                         <span class="text">Products</span>
                     </a>
                     <div class="submenu">
-                        <a href="{%url 'adminside:show-product' %}">Product List    </a>
+                        <a href="{%url 'adminside:show-product' %}">Product List </a>
                         <a href="{%url 'adminside:categories' %}">Categories</a>
+                        <a href="{%url 'adminside:category_offer_list' %}">Category Offer</a>
                     </div>
                 </li>
                 <li class="menu-item has-submenu">
@@ -80,6 +81,8 @@
                         <a href="{% url 'adminside:add-product' %}">Add product </a>
                         <a href="{% url 'adminside:add-variations' %}">Add Variations</a>
                         <a href="{% url 'adminside:add-coupon' %}">Add Coupon</a>
+                        <a href="{% url 'adminside:add_product_offer' %}">Add Product offer</a>
+                        <a href="{% url 'adminside:add_category_offer' %}">Add Category offer</a>
 
                     </div>
                    

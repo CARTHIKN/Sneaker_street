@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
+from offers.models import CategoryOffer, ProductOffer
 from userside.models import UserProfile, Product, Category, Product_image, Variation
 from django.contrib.auth import authenticate,login,logout
 from django.utils.text import slugify
@@ -7,6 +8,7 @@ from django.views.decorators.cache import cache_control
 from django.contrib.auth.decorators import user_passes_test
 from orders.models import Coupon, Order, OrderProduct, variation_category_choice
 from django.utils import timezone
+from django.http import HttpResponseBadRequest
 # Create your views here.
 
 def is_superuser(user):
@@ -131,6 +133,7 @@ def toggle_soft_delete(request, category_id):
         category.save()
         
         return redirect('adminside:categories')
+
 
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
@@ -394,3 +397,295 @@ def add_coupon(request):
         messages.success(request, 'coupon added successfully')
         return redirect('adminside:dashboard')
     return render(request, 'adminside/add_coupon.html')
+
+
+
+
+def add_product_offer(request):
+    products = Product.objects.all()
+    product_offers = ProductOffer.objects.all()
+
+    if request.method == 'POST':
+        offer_name = request.POST.get('offer_name')
+        expire_date = request.POST.get('expire_date')
+        product_ids = request.POST.getlist('product')  # Assuming 'product' is a multiple select field
+        discount_percentage = request.POST.get('discount_percentage')
+        product_offer_image = request.FILES.get('product_offer_image')
+        is_active = request.POST.get('is_active') 
+        if is_active == 'on':
+            is_active = True
+        else:
+            is_active = False
+
+        # Check if the offer name already exists
+        if ProductOffer.objects.filter(offer_name=offer_name).exists():
+            messages.error(request, 'Offer name already exists. Please choose a different name.')
+            return redirect('adminside:add_product_offer')
+        
+        
+        selected_date = timezone.datetime.strptime(expire_date, '%Y-%m-%d').date()
+        today = timezone.now().date()
+
+
+        if selected_date <= today:
+            messages.error(request, 'Expiration date should be greater than today\'s date.')
+            return redirect('adminside:add_product_offer')
+
+        # Check if the product list is empty
+        if not product_ids:
+            messages.error(request, 'Product list cannot be empty. Please select at least one product.')
+            return redirect('adminside:add_product_offer')
+
+        # Check if discount is greater than 0
+        if int(discount_percentage) <= 0:
+            messages.error(request, 'Discount should be greater than zero.')
+            return redirect('adminside:add_product_offer')
+        
+
+       
+
+        # Create the ProductOffer instance
+        product_offer = ProductOffer(
+            offer_name=offer_name,
+            expire_date=expire_date,
+            discount_percentage=discount_percentage,
+            product_offer_image=product_offer_image,
+            is_active=is_active
+        )
+        product_offer.save()
+
+        # Add products to the many-to-many field
+        product_offer.product.set(product_ids)
+
+        messages.success(request, 'Product offer added successfully.')
+        return redirect('adminside:add_product_offer') 
+
+    context = {
+        'products': products,
+        'product_offers': product_offers,
+    }
+    return render(request, 'adminside/product_offer.html', context)
+
+
+
+
+def edit_product_offer(request, offer_id):
+    product_offer = get_object_or_404(ProductOffer, id=offer_id)
+    products = Product.objects.all()
+    print('asdjfhkjassdfhkk')
+    if request.method == 'POST':
+        # Update the fields with the new values
+        offer_name = request.POST.get('offer_name')
+        expire_date = request.POST.get('expire_date')
+        product_ids = request.POST.getlist('product') 
+        discount_percentage = request.POST.get('discount_percentage')
+        product_offer_image = request.FILES.get('product_offer_image')
+        is_active = request.POST.get('is_active') 
+        if is_active == 'on':
+            is_active = True
+        else:
+            is_active = False
+
+        # Validate the input
+        if ProductOffer.objects.exclude(id=offer_id).filter(offer_name=offer_name).exists():
+            messages.error(request, 'Offer name already exists. Please choose a different name.')
+            return redirect('adminside:edit_product_offer', offer_id=offer_id)
+
+        selected_date = timezone.datetime.strptime(expire_date, '%Y-%m-%d').date()
+        today = timezone.now().date()
+
+        if selected_date <= today:
+            messages.error(request, 'Expiration date should be greater than today\'s date.')
+            return redirect('adminside:edit_product_offer', offer_id=offer_id)
+
+        if not product_ids:
+            messages.error(request, 'Product list cannot be empty. Please select at least one product.')
+            return redirect('adminside:edit_product_offer', offer_id=offer_id)
+
+        if int(discount_percentage) <= 0:
+            messages.error(request, 'Discount should be greater than zero.')
+            return redirect('adminside:edit_product_offer', offer_id=offer_id)
+
+        # If validation passes, update the product_offer
+        product_offer.offer_name = offer_name
+        product_offer.expire_date = expire_date
+        product_offer.discount_percentage = discount_percentage
+        product_offer.product_offer_image = product_offer_image
+        product_offer.is_active = is_active
+        
+        # Update other fields as neede
+        product_offer.save()
+
+        product_offer.product.set(product_ids)
+        
+        messages.success(request, 'Product offer updated successfully.')
+        return redirect('adminside:add_product_offer')
+
+    context = {
+        'products': products,
+        'product_offer': product_offer,
+    }
+
+    return render(request, 'adminside/edit_product_offer.html', context)
+
+
+
+def add_category_offer(request):
+    if request.method == 'POST':
+        # Get data from the request
+        offer_name = request.POST.get('offer_name')
+        expire_date = request.POST.get('expire_date')
+        category_id = request.POST.get('category')
+        discount_percentage = request.POST.get('discount_percentage')
+        category_offer_image = request.FILES.get('category_offer_image')
+        is_active = request.POST.get('is_active')
+        if is_active == 'on':
+            is_active = True
+        else:
+            is_active = False
+
+        # Validate data
+        if not offer_name or not expire_date or not category_id or not discount_percentage:
+            messages.error(request, "Invalid data. Please fill in all required fields.")
+            return redirect('adminside:add_category_offer')
+        
+        if CategoryOffer.objects.filter(offer_name=offer_name).exists():
+            messages.error(request, f"The offer name '{offer_name}' already exists. Please choose a different name.")
+            return redirect('adminside:add_category_offer')
+
+        # Additional validation
+        try:
+            # Check if expire_date is a valid date
+            expire_date = timezone.datetime.strptime(expire_date, '%Y-%m-%d').date()
+            if expire_date < timezone.now().date():
+                messages.error(request, "Invalid date format or expiration date should be in the future.")
+                return redirect('adminside:add_category_offer')
+        except ValueError:
+            pass
+           
+
+        # Validate discount_percentage
+        try:
+            discount_percentage = int(discount_percentage)
+            if discount_percentage <= 0 or discount_percentage > 100:
+                messages.error(request, "Discount percentage should be an integer between 1 and 100.")
+                return redirect('adminside:add_category_offer')
+        except ValueError:
+            pass
+            
+
+        # Validate category_id
+        
+        category_id = int(category_id)
+        category = Category.objects.get(pk=category_id)
+
+        # Handle slug creation
+        category_offer_slug = slugify(offer_name)
+        counter = CategoryOffer.objects.filter(category_offer_slug__istartswith=category_offer_slug).count()
+        if counter > 0:
+            category_offer_slug = f'{category_offer_slug}-{counter}'
+
+        # Create CategoryOffer instance
+        category_offer = CategoryOffer(
+            offer_name=offer_name,
+            expire_date=expire_date,
+            category=category,
+            discount_percentage=discount_percentage,
+            category_offer_slug=category_offer_slug,
+            category_offer_image=category_offer_image,
+            is_active=is_active
+        )
+        category_offer.save()
+        messages.success(request, 'Category offer added successfully.')
+
+        return redirect('adminside:category_offer_list')  
+
+    # Render the form for GET requests
+    categories = Category.objects.all()
+    context = {'categories': categories}
+    return render(request, 'adminside/add_category_offer.html', context)
+
+
+
+def category_offer_list(request):
+    category_offers = CategoryOffer.objects.all()
+
+    context = {
+        'category_offers':category_offers,
+
+    }
+    return render(request, 'adminside/category_offer_list.html', context)
+
+
+def edit_category_offer(request, category_offer_id):
+    print("yessssss")
+    category_offer = get_object_or_404(CategoryOffer, pk=category_offer_id)
+    if request.method == "POST":
+        
+        offer_name = request.POST.get('offer_name')
+        expire_date = request.POST.get('expire_date')
+        category_id = request.POST.get('category')
+        discount_percentage = request.POST.get('discount_percentage')
+        category_offer_image = request.FILES.get('category_offer_image')
+        is_active = request.POST.get('is_active')
+        if is_active == 'on':
+            is_active = True
+        else:
+            is_active = False
+
+        if not offer_name or not expire_date or not category_id or not discount_percentage:
+                messages.error(request, "Invalid data. Please fill in all required fields.")
+                return redirect('adminside:edit_category_offer', category_offer_id= category_offer_id)
+        
+        if CategoryOffer.objects.exclude(id=category_offer_id).filter(offer_name=offer_name).exists():
+            messages.error(request, f"The offer name '{offer_name}' already exists. Please choose a different name.")
+            return redirect('adminside:edit_category_offer',  category_offer_id= category_offer_id)
+
+
+        try:
+            # Check if expire_date is a valid date
+            expire_date = timezone.datetime.strptime(expire_date, '%Y-%m-%d').date()
+            if expire_date < timezone.now().date():
+                messages.error(request, "Invalid date format or expiration date should be in the future.")
+                return redirect('adminside:edit_category_offer',  category_offer_id= category_offer_id)
+        except ValueError:
+            pass
+
+        try:
+            discount_percentage = int(discount_percentage)
+            if discount_percentage <= 0 or discount_percentage > 100:
+                messages.error(request, "Discount percentage should be an integer between 1 and 100.")
+                return redirect('adminside:edit_category_offer',  category_offer_id= category_offer_id)
+        except ValueError:
+            pass
+        
+        category_id = int(category_id)
+        category = Category.objects.get(pk=category_id)
+        
+        category_offer_slug = slugify(offer_name)
+        counter = CategoryOffer.objects.filter(category_offer_slug__istartswith=category_offer_slug).count()
+        if counter > 0:
+            category_offer_slug = f'{category_offer_slug}-{counter}'
+
+
+        category_offer.offer_name = offer_name
+        category_offer.expire_date = expire_date
+        category_offer.discount_percentage = discount_percentage
+        category_offer.category_offer_image = category_offer_image
+        category_offer.category = category
+        category_offer.category_offer_slug = category_offer_slug
+        category_offer.is_active = is_active
+        
+        category_offer.save()
+        messages.success(request, 'Category offer Updated successfully.')
+
+        return redirect('adminside:category_offer_list')  
+
+
+
+    context = {
+        'categories': Category.objects.all(),
+        'edit_mode': True,  # Add this flag to distinguish between adding and editing
+        'category_offer': category_offer,  # Pass the CategoryOffer instance to the template
+    }
+    return render(request, 'adminside/add_category_offer.html', context)

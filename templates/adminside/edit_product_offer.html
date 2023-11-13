@@ -1,0 +1,79 @@
+{% extends "adminside/base1.html" %}
+{% block title %}Dashboard{% endblock title %}
+
+{% block content %}
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Product offers Edit </h2>
+        </div>
+       
+    </div>
+     <div class="card"> 
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-5">
+                    <form method="post" action="" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="product_name" class="form-label">Offer Name</label>
+                            <input type="text" placeholder="Type here" class="form-control" name="offer_name" value="{{ product_offer.offer_name }}" required />
+                        </div>
+                
+                    
+                        <div class="mb-4">
+                            <label class="form-label">Expire Date:</label>
+                            <input type="date" placeholder="Type here" class="form-control" name="expire_date" value="{{ product_offer.expire_date|date:'Y-m-d' }}" required />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Select Products:</label>
+                            <select name="product" class="form-select" multiple>
+                                {% for product in products %}
+                                <option value="{{ product.id }}" {% if product in product_offer.product.all %} selected {% endif %}>{{ product.Product_name }}</option>
+                            {% endfor %}
+                            </select>
+                        </div>
+
+
+                        <div class="mb-4">
+                            <label class="form-label">Discount Percentage:</label>
+                            <input type="number" placeholder="Type here" class="form-control" name="discount_percentage" value="{{ product_offer.discount_percentage }}" required />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Product Offer Image:</label>
+                            <input type="file" placeholder="Type here" class="form-control" name="product_offer_image" />
+                        </div>
+
+
+                        <div class="mb-4">
+                            <input class="form-check-input" type="checkbox" name="is_active" {% if product_offer.is_active %} checked {% endif %}>
+                            <label > Is Active: </label>
+                        </div>
+                        {% if messages %}
+                            <ul class="messages">
+                                {% for message in messages %}
+                                    {% if message.tags == 'error' %}
+                                    <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+                                        <strong></strong>{{message}}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        {% endif %} 
+
+
+                        <div class="d-grid">
+                            <button class="btn btn-primary" type="submit">Update Offer</button>
+                        </div>
+                    </form>
+                </div>
+            </div> <!-- .row // -->
+        </div> <!-- card body .// -->
+     </div> <!-- card .// --> 
+</section> 
+
+{% endblock content %}

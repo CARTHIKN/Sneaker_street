@@ -1,0 +1,176 @@
+{% extends "adminside/base1.html" %}
+{% block title %}Dashboard{% endblock title %}
+
+{% block content %}
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Product offers </h2>
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                        {% if message.tags == 'success' %}
+                        <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+                            <strong></strong>{{message}}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            
+        </div>
+        <div>
+            <input type="text" placeholder="Search Categories" class="form-control bg-white">
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <form method="post" action="{% url 'adminside:add_product_offer' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="product_name" class="form-label">Offer Name</label>
+                            <input type="text" placeholder="Type here" class="form-control" name="offer_name" required />
+                        </div>
+                
+                    
+                        <div class="mb-4">
+                            <label class="form-label">Expire Date:</label>
+                            <input type="date" placeholder="Type here" class="form-control" name="expire_date" required />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Select Products:</label>
+                            <select name="product" class="form-select" multiple>
+                            {% for product in products %}
+                                <option value="{{ product.id }}">{{ product.Product_name }}</option>
+                            {% endfor %}
+                            </select>
+                        </div>
+
+
+                        <div class="mb-4">
+                            <label class="form-label">Discount Percentage:</label>
+                            <input type="number" placeholder="Type here" class="form-control" name="discount_percentage" required />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Product Offer Image:</label>
+                            <input type="file" placeholder="Type here" class="form-control" name="product_offer_image" />
+                        </div>
+
+
+                        <div class="mb-4">
+                            <input class="form-check-input" type="checkbox" name= "is_active" checked >
+                            <label > Is Active: </label>
+                        </div>
+                        
+
+                        {% if messages %}
+                            <ul class="messages">
+                                {% for message in messages %}
+                                    {% if message.tags == 'error' %}
+                                    <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+                                        <strong></strong>{{message}}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        {% endif %} 
+                        <div class="d-grid">
+                            <button class="btn btn-primary" type="submit">Add Offer</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-9">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" />
+                                        </div>
+                                    </th>
+                                    <th>ID</th>
+                                    <th>Offer Name </th>
+                                    <th>Product</th>
+                                    <th>Discount Percentage </th>
+                                    <th>Expire Date </th>
+                                    <th>Is Active</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product_offer in product_offers  %}
+
+                                <tr>
+                                    <td class="text-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" />
+                                        </div>
+                                    </td>
+                                    <td>{{product_offer.id}}</td>
+                                    <td><b>{{product_offer.offer_name}}</b></td>
+                                    
+                                    <td>
+                                        {% for product in product_offer.product.all %}
+                                            {{ product.Product_name }}
+                                            {% if not forloop.last %}<br> {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td>{{product_offer.discount_percentage }} %</td>
+                                    <td>{{product_offer.expire_date }}</td>
+                                    <td><span class="badge rounded-pill alert-{% if product_offer.is_active == True %}success{% else %}danger{% endif %}">{{product_offer.is_active }}</span></td>
+                                    <td class="text-end">
+                                        <div class="dropdown">
+                                            <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm"> <i class="material-icons md-more_horiz"></i> </a>
+                                            <div class="dropdown-menu">
+                                               
+                                                <a class="dropdown-item" href="{% url 'adminside:edit_product_offer' product_offer.id %}">Edit </a>
+                                               
+                                            </div>
+                                        </div> <!-- dropdown //end -->
+                                    </td>
+                                </tr>
+
+                                
+                                
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div> <!-- .col// -->
+            </div> <!-- .row // -->
+        </div> <!-- card body .// -->
+    </div> <!-- card .// -->
+</section> 
+
+<style>
+    .messages {
+        list-style-type: none;
+        padding: 10px;
+    }
+    
+    .error-message {
+        background-color: #FFD2D2;  /* Light red background for error messages */
+    }
+    
+    .success-message {
+        background-color: #D2FFD2;  /* Light green background for success messages */
+    }
+    
+    .warning-message {
+        background-color: #FFE08C;  /* Light yellow background for warning messages */
+    }
+    
+    .info-message {
+        background-color: #CCE5FF;  /* Light blue background for info messages */
+    }
+</style>
+
+{% endblock content %}

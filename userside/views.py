@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import Category, UserProfile, Product, Product_image
+from .models import Category,  UserProfile, Product, Product_image
 from django.contrib.auth import authenticate,login,logout
 from django.core.mail import send_mail
 import pyotp
@@ -19,6 +19,8 @@ from django.utils import timezone
 from django.views.decorators.cache import cache_control
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+from orders.models import Review
 
 
 
@@ -195,10 +197,14 @@ def verify_otp(request):
 def product_details(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     in_cart = CartItem.objects.filter(cart__cart_id =_cart_id(request), product=product).exists()
+    reviews = Review.objects.filter(product=product)
 
+    print (reviews)
+    print("here is reviews")
     context = {
         'product':product,
-        'in_cart':in_cart
+        'in_cart':in_cart,
+        'reviews': reviews,
     }
 
     return render(request, 'productdetails.html', context)
@@ -438,3 +444,19 @@ def shop_product_by_category(request, category_slug):
 #     }
 
 #     return render(request, 'page-shop.html', context)
+
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)  
+@login_required
+def add_review(request, product_id):
+    if request.user.is_authenticated and not request.user.is_superuser:
+        if request.method == 'POST':
+            comment = request.POST.get('comment')
+            star_rating = request.POST.get('star_rating')
+
+            # Create a new Review object associated with the product
+            review = Review(user=request.user, comment=comment, star_rating=int(star_rating) * 20, product_id=product_id)
+            review.save()
+
+            return redirect('product_details', product_id=product_id)
+
+    return redirect('user_login')
