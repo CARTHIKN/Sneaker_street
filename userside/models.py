@@ -1,4 +1,3 @@
-from typing import Self
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin,Group, Permission
 from django.db import models
 from django.utils.text import slugify

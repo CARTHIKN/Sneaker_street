@@ -1,4 +1,3 @@
-from typing import Self
 from django.db import models
 from userside.models import UserProfile
 # Create your models here.
