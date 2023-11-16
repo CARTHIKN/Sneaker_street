@@ -4,6 +4,8 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib import messages
+
+from wallet.models import Wallet
 from .models import Category,  UserProfile, Product, Product_image
 from django.contrib.auth import authenticate,login,logout
 from django.core.mail import send_mail
@@ -124,6 +126,7 @@ def signup(request):
             mobile = request.POST['phone']
             password1 = request.POST['password1']
             password2 = request.POST['password2']   
+            referal_id = request.POST.get("referal_id")
             if password1 == password2 and password1 !="":
                 if UserProfile.objects.filter(username = username).exists() or UserProfile.objects.filter(email = email).exists():
                     return render(request, 'signup.html',{'error':"User already exist or Invalid Credential"})
@@ -150,6 +153,7 @@ def signup(request):
                         'phone': mobile,
                         'password1': password1,
                         'password2': password2,
+                        'referal_id':referal_id,
                     }
 
                     messages.success(request, "An OTP has been sent to your email. Enter it to complete registration.")
@@ -176,13 +180,36 @@ def verify_otp(request):
         if entered_otp == stored_otp:
             # OTP is correct, create the user in the database
             user_data = request.session['user_data']
-            user = UserProfile.objects.create_user(
+            myuser = UserProfile.objects.create_user(
                 username=user_data['username'],
                 email=user_data['email'],
                 password=user_data['password1'],
                 phone=user_data['phone']
             )
-            user.save()
+            myuser.save()
+
+            referal_id = user_data['referal_id']
+
+            if referal_id and len(referal_id) > 5:
+                try:
+                    referrer = UserProfile.objects.get(referral_id=referal_id)
+                    try:
+                        user_wallet = Wallet.objects.get(user=referrer)
+                        user_wallet.balance += 250
+                        user_wallet.save()
+                    except Wallet.DoesNotExist:
+                        messages.error(request, 'No Wallet exists for this user.')
+
+                    user_wallet, created = Wallet.objects.get_or_create(user=myuser, defaults={'balance': 0})
+                    user_wallet.balance += 250
+                    user_wallet.save()
+                except UserProfile.DoesNotExist:
+                    messages.error(request, 'Invalid referral code.')
+
+            else:            
+                messages.success(request, "Signup Successfully..Please Login!")
+                return redirect(user_login)
+
             messages.success(request, "Your account has been successfully created.")
             del request.session['otp_code']
             del request.session['user_data']

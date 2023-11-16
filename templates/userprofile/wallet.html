@@ -22,6 +22,16 @@
                                             <!-- Balance in Wallet -->
                                             <p>Rs: {{ wallet.balance }}</p>
                                         </div>
+
+                                        <div class="row mb-3">
+                                            <div class="col-12 text-center">
+                                                <div class="custom-box">
+                                                    <h5 class="mb-2">REFERRAL CODE</h5>
+                                                    <p class="font-weight-bold">{{ request.user.referral_id }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
                                         <div class="card-body">
                                             <!-- Wallet History -->
                                             <!-- Add your code for wallet history here -->

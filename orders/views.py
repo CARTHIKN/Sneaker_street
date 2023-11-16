@@ -6,13 +6,17 @@ from carts.models import CartItem
 from orders.forms import addressbook_form
 from wallet.models import Wallet, WalletTransaction
 from .models import Coupon, Order, PaymentMethod, Payment, OrderProduct
-import datetime
 from userside.models import Product, Variation
 from django.views.decorators.cache import cache_control
 from userside.models import *
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 import razorpay
+from django.utils import timezone
+from django.db.models import Sum
+from django.http import JsonResponse
+import datetime
+
 # Create your views here.
 
 
@@ -148,7 +152,7 @@ def place_order(request, total=0, quantity=0):
 
 
     #generate order number
-    yr = int(datetime.date.today().strftime('%Y'))
+    yr = int(datetime.date.today().year)
     dt = int(datetime.date.today().strftime('%d'))
     mt = int(datetime.date.today().strftime('%m'))
     d = datetime.date(yr,mt,dt)
@@ -533,3 +537,48 @@ def delete_address(request, id):
     address = AddressBook.objects.get(id=id)
     address.delete()
     return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+
+
+def get_weekly_sales():
+    end_date = timezone.now()
+    start_date = end_date - timezone.timedelta(days=7)
+
+    return OrderProduct.objects.filter(
+        order__created_at__range=(start_date, end_date)
+    ).values('product__Product_name').annotate(weekly_sales=Sum('quantity'))
+
+
+
+def get_monthly_sales():
+    end_date = timezone.now()
+    start_date = end_date - timezone.timedelta(days=30)
+
+    return OrderProduct.objects.filter(
+        order__created_at__range=(start_date, end_date)
+    ).values('product__Product_name').annotate(monthly_sales=Sum('quantity'))
+
+
+
+def get_yearly_sales():
+    end_date = timezone.now()
+    start_date = end_date - timezone.timedelta(days=365)
+
+    return OrderProduct.objects.filter(
+        order__created_at__range=(start_date, end_date)
+    ).values('product__Product_name').annotate(yearly_sales=Sum('quantity'))
+
+
+
+def sales_report(request):
+    weekly_sales_data = list(get_weekly_sales().values('product__Product_name','weekly_sales'))  # Convert QuerySet to a list of dictionaries
+    monthly_sales_data = list(get_monthly_sales().values('product__Product_name','monthly_sales'))
+    yearly_sales_data = list(get_yearly_sales().values('product__Product_name','yearly_sales'))
+    sales_data = {
+        'weekly_sales': weekly_sales_data,
+        'monthly_sales': monthly_sales_data,
+        'yearly_sales': yearly_sales_data,
+    }
+
+    print(weekly_sales_data)
+    return JsonResponse(sales_data, safe=False)

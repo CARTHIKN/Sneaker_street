@@ -13,6 +13,7 @@ urlpatterns = [
     path('add-address/', views.add_address, name='add-address'),
     path('default_address/<int:id>', views.default_address, name="default_address"),
     path('delete_address/<int:id>', views.delete_address, name="delete_address"),
+    path('sales-report', views.sales_report, name='sales-report'),
 
 
     

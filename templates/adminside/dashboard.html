@@ -89,7 +89,7 @@
             <div class="card mb-4">
                 <article class="card-body">
                     <h5 class="card-title">Sale statistics</h5>
-                    <canvas id="myChart" height="120px"></canvas>
+                    <canvas id="newChart" height="120px"></canvas>
                 </article>
             </div>
             <div class="row">
@@ -486,6 +486,88 @@
         </nav>
     </div>
 </section> 
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+
+<script>
+    async function getSalesReport() {
+        return new Promise(function(resolve, reject) {
+            $.ajax({
+                url: 'http://127.0.0.1:8000/orders/sales-report',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    resolve(data);
+                },
+                error: function(error) {
+                    reject(error);
+                }
+            });
+        });
+    }
+
+    (function ($) {
+        "use strict";
+
+        if ($('#newChart').length) {
+            //getting data
+            getSalesReport()
+                .then(function(data) {
+                    console.log(data);
+                    // Move the chart drawing logic inside this block
+                    drawChart(data);
+                })
+                .catch(function(error) {
+                    console.error('Error:', error);
+                });
+
+            async function drawChart(data) {
+                const ctx = document.getElementById('newChart').getContext('2d');
+
+                const productNames = data.weekly_sales.map(item => item.product__Product_name);
+                const weeklySales = data.weekly_sales.map(item => item.weekly_sales);
+                const monthlySales = data.monthly_sales.map(item => item.monthly_sales);
+                const yearlySales = data.yearly_sales.map(item => item.yearly_sales);
+
+                const chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: productNames,
+                        datasets: [
+                            {
+                                label: 'Weekly Sales',
+                                data: weeklySales,
+                                backgroundColor: 'rgba(44, 120, 220, 0.2)',
+                                borderColor: 'rgba(44, 120, 220)',
+                            },
+                            {
+                                label: 'Monthly Sales',
+                                data: monthlySales,
+                                backgroundColor: 'rgba(4, 209, 130, 0.2)',
+                                borderColor: 'rgb(4, 209, 130)',
+                            },
+                            {
+                                label: 'Yearly Sales',
+                                data: yearlySales,
+                                backgroundColor: 'rgba(380, 200, 230, 0.2)',
+                                borderColor: 'rgb(380, 200, 230)',
+                            }
+                        ]
+                    },
+                    options: {
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    usePointStyle: true,
+                                },
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    })(jQuery);
+</script>
 
 
 {% endblock content %}
