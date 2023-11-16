@@ -1,6 +1,6 @@
 from decimal import Decimal
 from django.contrib import messages
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from orders.models import Coupon
 from userside.models import AddressBook, Product,Variation
@@ -257,3 +257,20 @@ def checkout(request, total=0, quantity=0, cart_items=None, tax=0, grand_total=0
 
     }
     return render(request, 'cart/checkout.html',context)
+
+def calculate_coupon_discount(request):
+    print("==============================================================")
+    coupon_code = request.POST.get('coupon_code', None)
+
+    # Check if a coupon code is provided
+    if coupon_code:
+        # Retrieve the coupon from the database
+        coupon = get_object_or_404(Coupon, coupon_code=coupon_code, active=True)
+        # Calculate the discount (adjust this based on your logic)
+        discount = coupon.discount
+
+        # Return the discount in the JSON response
+        return JsonResponse({'discount': discount})
+    else:
+        # If no coupon code is provided, return a zero discount
+        return JsonResponse({'discount': 0})

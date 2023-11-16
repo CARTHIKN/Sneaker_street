@@ -82,11 +82,19 @@
                                 <tbody>
                                     <tr>
                                         <td class="cart_total_label">Cart Subtotal</td>
-                                        <td class="cart_total_amount"><span class="font-lg fw-900 text-brand">${{total}}</span></td>
+                                        <td class="cart_total_amount"><span class="font-lg fw-900 text-brand">${{subtotal}}</span></td>
                                     </tr>
                                     <tr>
                                         <td class="cart_total_label">Shipping</td>
                                         <td class="cart_total_amount"> <i class="ti-gift mr-5"></i> Free Shipping</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="cart_total_label">Coupon</td>
+                                        <td class="cart_total_amount"> <i class="ti-gift mr-5"></i>- {{coupon_dis}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="cart_total_label">Wallet</td>
+                                        <td class="cart_total_amount"> <i id="wallet_dis" class="ti-gift mr-5"></i>0</td>
                                     </tr>
                                     <tr>
                                         <td class="cart_total_label">Total</td>
@@ -204,10 +212,13 @@
             },
             success: (data) => {
                 if (data.status === "success") {
+
+
                     document.getElementById('wallet_updated_balance').innerHTML = data.wallet_balance;
                     var totalAmount = data.grand_total; // Store the total amount
                     document.getElementById('totalAmount').innerHTML = totalAmount; // Update the total amount in the HTML
                     document.getElementById('grand_total_update').innerHTML = totalAmount; // Update the total amount within the pay button
+                    document.getElementById('wallet_dis').innerHTML = "- "+data.wallet_dis
                     if (totalAmount == 0) {
                         document.getElementById('id_payment_div_RAZORPAY').disabled = true;
                         document.getElementById('id_payment_div_COD').disabled = true;

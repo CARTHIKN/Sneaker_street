@@ -146,9 +146,13 @@
                                             <th>Shipping</th>
                                             <td colspan="2"><em>Free Shipping</em></td>
                                         </tr>
+                                        <tr id="coupon-row" style="display:None">
+                                            <th>Coupon Discount</th>
+                                            <td colspan="2" class="coupon-subtotal"><span class="font-xl text-brand fw-900">$0.00</span></td>
+                                        </tr>
                                         <tr>
                                             <th>Total</th>
-                                            <td colspan="2" class="product-subtotal"><span class="font-xl text-brand fw-900">${{total}}.00</span></td>
+                                            <td colspan="2" class="product-subtotal"><span id="total" class="font-xl text-brand fw-900">${{total}}.00</span></td>
                                         </tr>
                                         
                                     </tbody>
@@ -173,7 +177,7 @@
                         </div>
                         {% endfor %}
 
-                        <div class="mb-30 mt-50">
+                        <div class="mb-30 mt-50">{% csrf_token %}
                             <div class="heading_s1 mb-3">
                                 <h4>Available Coupons</h4>
                             </div>
@@ -190,14 +194,46 @@
                         </div>
                         <script>
                             function select_coupon(coupon_id){
-                               coupon=document.getElementById(coupon_id).innerHTML
-                               console.log(coupon);
-                               document.getElementById("enter-couponcode").value=coupon
+                                coupon = document.getElementById(coupon_id).innerHTML;
+                                console.log(coupon);
+                                document.getElementById("enter-couponcode").value = coupon;
+                            
+                                // AJAX call to update coupon discount
+                                updateCouponDiscount(coupon);
                             }
 
                             function de_select_coupon(coupon_id){
                             
-                               document.getElementById("enter-couponcode").value=''
+                                document.getElementById("enter-couponcode").value = '';
+
+                                // AJAX call to update coupon discount
+                                updateCouponDiscount(null);
+                            }
+
+                            function updateCouponDiscount(couponCode) {
+                                const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                                const total_amt = {{total}}
+                                $.ajax({
+                                    url: "{% url 'calculate_coupon_discount' %}",
+                                    type: 'POST',
+                                    data: { 'coupon_code': couponCode },
+                                    headers: {
+                                        'X-CSRFToken': csrftoken
+                                    },
+                                    success: function (data) {
+                                        // Update the coupon discount in the row
+                                        var couponRow = document.getElementById('coupon-row');
+                                        var couponSubtotal = couponRow.getElementsByClassName('coupon-subtotal')[0];
+                                        couponSubtotal.innerHTML = '<span class="font-xl text-brand fw-900">$' + data.discount + '.00</span>';
+                            
+                                        // Show/hide the coupon row based on whether a coupon is selected
+                                        couponRow.style.display = couponCode ? 'table-row' : 'none';
+                                        document.getElementById("total").innerHTML = total_amt - parseInt(data.discount)
+                                    },
+                                    error: function (error) {
+                                        console.log('Error:', error);
+                                    }
+                                });
                             }
 
                         </script>

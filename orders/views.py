@@ -41,7 +41,6 @@ def order_summary(request, total=0, quantity=0):
         coupon_discount = 0
         request.session['coupon'] = 0
         coupon_code = request.POST.get('coupon')
-        print(coupon_code)
         coupon = None
         
         if coupon_code:
@@ -87,11 +86,13 @@ def order_summary(request, total=0, quantity=0):
           # order.order_total = order_total
           # order.wallet_discount=0
 
-
+        subtotal = float(total)+request.session['coupon']
         context = {
             'paymentmethods':PaymentMethod.objects.all(),
             'cart_items':cart_items,
             'total':float(total),
+            'subtotal':subtotal,
+            'coupon_dis':request.session['coupon'],
             'address':address,
             'wallet':wallet,
             }

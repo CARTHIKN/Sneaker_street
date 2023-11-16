@@ -36,21 +36,23 @@ def get_wallet_grand_total(request):
         grand_total = total
         print(grand_total)
         wallet_balance = wallet.balance  
-        
+        wallet_dis = 0
         if check=='true':  
             if wallet.balance <= grand_total  :  
                 grand_total = grand_total- wallet.balance   
+                wallet_dis = wallet.balance
                 wallet_balance = 0
             else:
+                wallet_dis = grand_total
                 wallet_balance = wallet.balance - grand_total
                 grand_total = 0
 
 
         
                     
-            return JsonResponse({"status": "success", "grand_total":grand_total,"wallet_balance":wallet_balance})
+            return JsonResponse({"status": "success", "grand_total":grand_total,"wallet_balance":wallet_balance, "wallet_dis":wallet_dis})
         else:
-            return JsonResponse({"status": "success", "grand_total":grand_total,"wallet_balance":wallet_balance})
+            return JsonResponse({"status": "success", "grand_total":grand_total,"wallet_balance":wallet_balance, "wallet_dis":wallet_dis})
     else:
             print("hello")
             return JsonResponse({"status": "success", "grand_total":12334,"wallet_balance":1205})

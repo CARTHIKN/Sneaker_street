@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,12 +24,11 @@ AUTH_USER_MODEL = 'userside.UserProfile'
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-x#zkjc4k7@!x2ghjp_*lt_*4y18o-p394%p8ngkai=esf_^-%@'
-
+SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG',default=False,cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -50,12 +50,13 @@ INSTALLED_APPS = [
     
 ]
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  # Use the SMTP server of your email provider
-EMAIL_PORT = 587  # Port for TLS
-EMAIL_USE_TLS = True  # Use TLS for secure connection
-EMAIL_HOST_USER = 'carthikn1920@gmail.com'  # Your email address
-EMAIL_HOST_PASSWORD = 'ihyd nrns djbi lafi'
+
+EMAIL_BACKEND = config('EMAIL_BACKEND')
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS')
 
 
 
@@ -99,9 +100,9 @@ WSGI_APPLICATION = 'sneaker_street.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'sneakerstreet',
-        'USER': 'postgres',
-        'PASSWORD': '1920',
+        "NAME": config('NAME'),
+        "USER": config('USER'),
+        "PASSWORD": config('PASSWORD'),
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -159,6 +160,6 @@ STATICFILES_DIRS=[
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-RAZORPAY_KEY_ID = 'rzp_test_2Ppy65nLGqi9SS'
-RAZORPAY_KEY_SECRET = 'qVSdJRKkjbSDCdcXigEo68bs'
-SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
+RAZORPAY_KEY_ID = config('RAZORPAY_KEY_ID')
+RAZORPAY_KEY_SECRET = config('RAZORPAY_KEY_SECRET')
+SECURE_CROSS_ORIGIN_OPENER_POLICY = config('SECURE_CROSS_ORIGIN_OPENER_POLICY')
