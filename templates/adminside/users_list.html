@@ -38,7 +38,7 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Seller</th>
+                            <th>User Name</th>
                             <th>Email</th>
                             <th>Status</th>
                             <th>Registered</th>
@@ -50,9 +50,9 @@
                         <tr>
                             <td width="40%">
                                 <a href="#" class="itemside">
-                                    <div class="left">
+                                    {% comment %} <div class="left">
                                         <img src="assets-1/imgs/people/avatar1.jpg" class="img-sm img-avatar" alt="Userpic">
-                                    </div>
+                                    </div> {% endcomment %}
                                     <div class="info pl-3">
                                         <h6 class="mb-0 title">{{user.username}}</h6>
                                         <small class="text-muted">#{{user.id}}</small>

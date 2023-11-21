@@ -1307,54 +1307,18 @@
                 <div class="carausel-6-columns-cover position-relative">
                     <div class="slider-arrow slider-arrow-2 carausel-6-columns-arrow" id="carausel-6-columns-arrows"></div>
                     <div class="carausel-6-columns" id="carausel-6-columns">
-                        <div class="card-1">
-                            <figure class=" img-hover-scale overflow-hidden">
-                                <a href="shop-grid-right.html"><img src={% static "assets/imgs/shop/category-thumb-1.jpg" %} alt=""></a>
-                            </figure>
-                            <h5><a href="shop-grid-right.html">T-Shirt</a></h5>
-                        </div>
-                        <div class="card-1">
-                            <figure class=" img-hover-scale overflow-hidden">
-                                <a href="shop-grid-right.html"> <img src={% static "assets/imgs/shop/category-thumb-2.jpg" %} alt=""></a>
-                            </figure>
-                            <h5><a href="shop-grid-right.html">Bags</a></h5>
-                        </div>
-                        <div class="card-1">
-                            <figure class=" img-hover-scale overflow-hidden">
-                                <a href="shop-grid-right.html"><img src={% static "assets/imgs/shop/category-thumb-3.jpg" %} alt=""></a>
-                            </figure>
-                            <h5><a href="shop-grid-right.html">Sandan</a></h5>
-                        </div>
-                        <div class="card-1">
-                            <figure class=" img-hover-scale overflow-hidden">
-                                <a href="shop-grid-right.html"><img src={% static "assets/imgs/shop/category-thumb-4.jpg" %} alt=""></a>
-                            </figure>
-                            <h5><a href="shop-grid-right.html">Scarf Cap</a></h5>
-                        </div>
-                        <div class="card-1">
-                            <figure class=" img-hover-scale overflow-hidden">
-                                <a href="shop-grid-right.html"><img src={% static "assets/imgs/shop/category-thumb-5.jpg" %} alt=""></a>
-                            </figure>
-                            <h5><a href="shop-grid-right.html">Shoes</a></h5>
-                        </div>
-                        <div class="card-1">
-                            <figure class=" img-hover-scale overflow-hidden">
-                                <a href="shop-grid-right.html"><img src={% static "assets/imgs/shop/category-thumb-6.jpg" %} alt=""></a>
-                            </figure>
-                            <h5><a href="shop-grid-right.html">Pillowcase</a></h5>
-                        </div>
-                        <div class="card-1">
-                            <figure class=" img-hover-scale overflow-hidden">
-                                <a href="shop-grid-right.html"><img src={% static "assets/imgs/shop/category-thumb-7.jpg" %} alt=""></a>
-                            </figure>
-                            <h5><a href="shop-grid-right.html">Jumpsuits</a></h5>
-                        </div>
-                        <div class="card-1">
-                            <figure class=" img-hover-scale overflow-hidden">
-                                <a href="shop-grid-right.html"><img src={% static "assets/imgs/shop/category-thumb-8.jpg" %} alt=""></a>
-                            </figure>
-                            <h5><a href="shop-grid-right.html">Hats</a></h5>
-                        </div>
+                        {% for cat in categories  %}
+                        {% if not cat.soft_deleted %}
+                       <div class="card-1">
+                           <figure class=" img-hover-scale overflow-hidden">
+                               <a href="shop-grid-right.html"><img src="{{cat.Category_image.url}}" alt=""></a>
+                           </figure>
+                           <h5><a href="shop-grid-right.html">{{cat.Category_name}}</a></h5>
+                       </div>
+                        {% endif %}
+                       {% endfor %}
+                        
+                        
                     </div>
                 </div>
             </div>
@@ -1395,7 +1359,7 @@
                 </div>
             </div>
         </section>
-        <section class="pt-25 pb-20">
+        {% comment %} <section class="pt-25 pb-20">
             <div class="container wow fadeIn animated">
                 <h3 class="section-title mb-20"><span>New</span> Arrivals</h3>
                 <div class="carausel-6-columns-cover position-relative">
@@ -1618,7 +1582,7 @@
                     </div>
                 </div>
             </div>
-        </section>
+        </section> {% endcomment %}
        
         <section class="section-padding">
             <div class="container pb-20">
@@ -1651,7 +1615,7 @@
                 </div>
             </div>
         </section>
-        <section class="bg-grey-9 section-padding">
+        {% comment %} <section class="bg-grey-9 section-padding">
             <div class="container pt-15 pb-25">
                 <div class="heading-tab d-flex">
                     <div class="heading-tab-left wow fadeIn animated">
@@ -2267,7 +2231,7 @@
                     <!--End Col-lg-9-->
                 </div>
             </div>
-        </section>
+        </section> {% endcomment %}
         
        
        
