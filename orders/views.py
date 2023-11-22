@@ -61,7 +61,7 @@ def order_summary(request, total=0, quantity=0):
             messages.warning(request, 'Please Set Default Shipping Address')
             return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
-        wallet = Wallet.objects.get(user=request.user, is_active=True)
+        wallet = Wallet.objects.get_or_create(user=request.user, is_active=True)
 
 
         if request.POST.get('wallet_balance'):
