@@ -72,7 +72,8 @@
                     </div>
                     
                     <div class="mb-4">
-                        <input class="form-check-input" type="checkbox" checked name = "is_available" value= value="{% if product %}{{ product.is_availble }} {% else %} "True" {% endif %}" >
+                        <input class="form-check-input" type="checkbox" {% if product.is_available %}checked{% endif %} name="is_available" value="True">
+
 
                         <label> is availble </label>
                     </div>

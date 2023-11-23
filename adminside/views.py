@@ -167,17 +167,17 @@ def add_product(request):
                     additional_images = request.FILES.getlist('additional_images')
                     max_price = request.POST['max_price']
                     quantity = request.POST['quantity']
-                    is_available = request.POST.get('is_available') == 'True' 
+                    is_available = request.POST.get('is_available') 
                     if main_image == None:
                         messages.warning(request, "Upload a main img")
                         return redirect('adminside:add-product')
                     if len(additional_images) != 4 or any(image is None for image in additional_images):
                          messages.error(request, 'You must provide exactly 4 additional images, and none of them should be empty.')
                          return redirect('adminside:add-product')
-                    if is_available == 'on':
+                    if is_available == 'on' or is_available == 'True':
                         is_available = True
                     else:
-                        is_available = False 
+                        is_available = False
                     soft_deleted = request.POST.get('is_available', False) 
                     if soft_deleted == 'on':
                         soft_deleted = True
