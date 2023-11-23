@@ -1311,9 +1311,9 @@
                         {% if not cat.soft_deleted %}
                        <div class="card-1">
                            <figure class=" img-hover-scale overflow-hidden">
-                               <a href="shop-grid-right.html"><img src="{{cat.Category_image.url}}" alt=""></a>
+                               <a href="{% url 'shop-product-by-category' category_slug=cat.slug %}"><img src="{{cat.Category_image.url}}" alt=""></a>
                            </figure>
-                           <h5><a href="shop-grid-right.html">{{cat.Category_name}}</a></h5>
+                           <h5><a href="{% url 'shop-product-by-category' category_slug=cat.slug %}">{{cat.Category_name}}</a></h5>
                        </div>
                         {% endif %}
                        {% endfor %}
