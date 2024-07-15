@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sneakers
+  labels:
+    app: sneakers
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sneakers
+  template:
+    metadata:
+      labels:
+        app: sneakers
+    spec:
+      containers:
+        - name: sneakers
+          image: karthikeyan2002/sneakers:latest
+          envFrom:
+            - secretRef:
+                name: sneakers-secret
+            - configMapRef:
+                name: sneakers-config
+          ports:
+            - containerPort: 8000

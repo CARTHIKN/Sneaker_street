@@ -193,23 +193,28 @@
                             </div>
                         </div>
                         <script>
-                            function select_coupon(coupon_id){
+                            function select_coupon(coupon_id) {
+                                // Check if the coupon is already selected
+                                if (document.getElementById("enter-couponcode").value !== '') {
+                                    alert('Coupon is already selected.');
+                                    return; // Stop further execution
+                                }
+                        
                                 coupon = document.getElementById(coupon_id).innerHTML;
                                 console.log(coupon);
                                 document.getElementById("enter-couponcode").value = coupon;
-                            
+                        
                                 // AJAX call to update coupon discount
                                 updateCouponDiscount(coupon);
                             }
-
-                            function de_select_coupon(coupon_id){
-                            
+                        
+                            function de_select_coupon() {
                                 document.getElementById("enter-couponcode").value = '';
-
+                        
                                 // AJAX call to update coupon discount
                                 updateCouponDiscount(null);
                             }
-
+                        
                             function updateCouponDiscount(couponCode) {
                                 const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
                                 const total_amt = {{total}}
@@ -225,7 +230,7 @@
                                         var couponRow = document.getElementById('coupon-row');
                                         var couponSubtotal = couponRow.getElementsByClassName('coupon-subtotal')[0];
                                         couponSubtotal.innerHTML = '<span class="font-xl text-brand fw-900">$' + data.discount + '.00</span>';
-                            
+                        
                                         // Show/hide the coupon row based on whether a coupon is selected
                                         couponRow.style.display = couponCode ? 'table-row' : 'none';
                                         document.getElementById("total").innerHTML = total_amt - parseInt(data.discount)

@@ -4,7 +4,6 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib import messages
-
 from wallet.models import Wallet
 from .models import Category,  UserProfile, Product, Product_image
 from django.contrib.auth import authenticate,login,logout
@@ -138,7 +137,7 @@ def signup(request):
         # Send OTP to the user's email
                     subject = 'OTP Verification'
                     message = f'Your OTP for signup is: {otp_code}'
-                    from_email = 'carthikn1920@gamil.com'  # Change this to your email address
+                    from_email = 'carthikn1920@gmail.com'  # Change this to your email address
                     recipient_list = [email]
 
                     send_mail(subject, message, from_email, recipient_list, fail_silently=False)

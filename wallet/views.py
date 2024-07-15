@@ -1,13 +1,14 @@
 from django.shortcuts import render
 from razorpay import Order
 from carts.models import CartItem
-
+from django.contrib.auth.decorators import login_required
 from wallet.models import Wallet
 from django.http import JsonResponse 
-
+from django.views.decorators.cache import cache_control
 # Create your views here.
 
-
+@login_required
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def wallet(request):
   wallet,created = Wallet.objects.get_or_create(user=request.user, is_active=True)
   context = {
@@ -15,7 +16,8 @@ def wallet(request):
   }
   return render(request, 'userprofile/wallet.html', context)
 
-
+@login_required
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def get_wallet_grand_total(request):
     print("hellooo")
     order_number = request.GET.get('order_number')
